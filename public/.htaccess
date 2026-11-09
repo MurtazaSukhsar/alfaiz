@@ -1,0 +1,10 @@
+# Correct types for the chatbot model files (Hostinger / Apache / LiteSpeed)
+AddType text/javascript .mjs
+AddType application/wasm .wasm
+AddType application/octet-stream .onnx
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(onnx|wasm|mjs)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+</IfModule>
