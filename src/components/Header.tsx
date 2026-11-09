@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { site, waLink } from '@/data/site';
 import type { Facet } from '@/lib/types';
+import { AnnouncementBar } from './AnnouncementBar';
 import { Icon } from './Icons';
 import { Logo } from './Logo';
 import { useQuote } from './QuoteProvider';
@@ -14,7 +15,7 @@ const links = [
   { href: '/', label: 'Home' },
   { href: '/collections/all/', label: 'Products', menu: true },
   { href: '/pages/about-us/', label: 'About' },
-  { href: '/#faq', label: 'FAQ' },
+  { href: '/pages/faq/', label: 'FAQ' },
   { href: '/pages/contact/', label: 'Contact' },
 ];
 
@@ -59,7 +60,7 @@ export function Header({ categories, brands, total }: { categories: Facet[]; bra
 
   return (
     <>
-      <div className="h-[3px] bg-accent" />
+      <AnnouncementBar />
       <header className="sticky top-0 z-40 border-b border-[#E6E7E4] bg-white/95 backdrop-blur-md">
         <div className="wrap flex flex-wrap items-center gap-x-2 py-2.5 sm:gap-x-4 lg:h-[72px] lg:flex-nowrap lg:py-0">
           <Logo />

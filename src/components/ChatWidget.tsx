@@ -92,6 +92,13 @@ export function ChatWidget() {
     setMsgs((m) => (m.length ? m : [{ id: nextId++, from: 'bot', reply: GREETING }]));
   }, [warmUp]);
 
+  // other parts of the site can open the assistant: window.dispatchEvent(new Event('alfaiz:open-chat'))
+  useEffect(() => {
+    const onOpen = () => openChat();
+    window.addEventListener('alfaiz:open-chat', onOpen);
+    return () => window.removeEventListener('alfaiz:open-chat', onOpen);
+  }, [openChat]);
+
   useEffect(() => {
     if (!open) return;
     inputRef.current?.focus({ preventScroll: true });
@@ -195,9 +202,9 @@ export function ChatWidget() {
           rel="noopener"
           aria-label="Chat with Al Faiz on WhatsApp"
           title="WhatsApp us"
-          className={`${open ? 'hidden' : 'grid'} size-12 place-items-center rounded-full bg-[#25D366] shadow-[0_10px_24px_-8px_rgba(21,23,26,.45)] transition duration-300 hover:-translate-y-0.5 hover:brightness-105`}
+          className={`${open ? 'hidden' : 'grid'} size-[60px] place-items-center rounded-full bg-[#25D366] ring-2 ring-white shadow-[0_10px_24px_-8px_rgba(21,23,26,.45)] transition duration-300 hover:-translate-y-0.5 hover:brightness-105`}
         >
-          <span aria-hidden="true" className="size-6 bg-white [mask:url(/icons/whatsapp.svg)_center/contain_no-repeat]" />
+          <span aria-hidden="true" className="size-[34px] bg-white [mask:url(/icons/whatsapp.svg)_center/contain_no-repeat]" />
         </a>
 
         <div className="relative flex items-center">
@@ -216,7 +223,7 @@ export function ChatWidget() {
             aria-label={open ? 'Close assistant' : 'Open the Al Faiz assistant'}
             aria-expanded={open}
             aria-controls="alfaiz-chat"
-            className={`relative grid size-[60px] place-items-center rounded-full bg-accent text-white shadow-[0_14px_30px_-10px_rgba(156,0,21,.6)] transition duration-300 hover:-translate-y-0.5 hover:brightness-110 ${open ? '' : 'anim-pulse'}`}
+            className={`relative grid size-[60px] place-items-center rounded-full bg-accent text-white ring-2 ring-white shadow-[0_14px_30px_-10px_rgba(156,0,21,.6)] transition duration-300 hover:-translate-y-0.5 hover:brightness-110 ${open ? '' : 'anim-pulse'}`}
           >
             <Icon name={open ? 'x' : 'bot'} size={open ? 24 : 27} strokeWidth={1.9} />
             {!open && <span className="absolute right-1 top-1 size-3 rounded-full bg-[#2BB673] ring-2 ring-white" aria-hidden="true" />}
@@ -249,7 +256,7 @@ export function ChatWidget() {
               </span>
             </span>
             <a href={waLink()} target="_blank" rel="noopener" aria-label="Talk to a person on WhatsApp" title="Talk to a person" className="grid size-10 place-items-center rounded-full bg-white/10 transition hover:bg-[#25D366]">
-              <span aria-hidden="true" className="size-[18px] bg-white [mask:url(/icons/whatsapp.svg)_center/contain_no-repeat]" />
+              <span aria-hidden="true" className="size-[22px] bg-white [mask:url(/icons/whatsapp.svg)_center/contain_no-repeat]" />
             </a>
             <button type="button" onClick={() => setOpen(false)} aria-label="Close assistant" className="grid size-10 place-items-center rounded-full bg-white/10 transition hover:bg-white/20">
               <Icon name="x" size={18} strokeWidth={2} />
@@ -318,11 +325,23 @@ export function ChatWidget() {
   );
 }
 
+/** Button that opens the assistant from anywhere on the site. */
+export function AskAssistant({ label = 'Ask our assistant' }: { label?: string }) {
+  return (
+    <button type="button" onClick={() => window.dispatchEvent(new Event('alfaiz:open-chat'))} className="pill pill-lg bg-accent text-white">
+      <Icon name="bot" size={18} strokeWidth={1.9} />
+      {label}
+    </button>
+  );
+}
+
 const PAGES: [RegExp, string, string][] = [
   [/\b(cart|basket|bag|checkout)\b/, 'your cart', '/cart/'],
+  [/\b(bulk|boq|special (product|request)|request form)\b/, 'the bulk & special request page', '/pages/bulk-special-product-request/'],
+  [/\b(privacy|policy)\b/, 'the privacy policy', '/policies/privacy-policy/'],
   [/\b(contact|map|location|showroom|address)\b/, 'the contact page', '/pages/contact/'],
   [/\babout\b/, 'About us', '/pages/about-us/'],
-  [/\b(faq|questions)\b/, 'the FAQ', '/#faq'],
+  [/\b(faq|faqs|questions|help centre|help center)\b/, 'the FAQ page', '/pages/faq/'],
   [/\b(home|homepage|start)\b/, 'the home page', '/'],
   [/\b(all products|catalog|catalogue|shop|store|products)\b/, 'all products', '/collections/all/'],
   [/\bsearch\b/, 'search', '/search/'],

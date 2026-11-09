@@ -350,12 +350,22 @@
     transform: scale(1.06);
   }
 
-  .grid-pattern {
-    background-color: var(--color-ink);
+  /* Footer: Al Faiz logo colours, black into deep crimson (no grid) */
+  .footer-gradient {
+    background-color: #15171a;
     background-image:
-      linear-gradient(rgb(255 255 255 / 0.045) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(255 255 255 / 0.045) 1px, transparent 1px);
-    background-size: 48px 48px;
+      radial-gradient(55% 70% at 100% 100%, rgb(196 0 27 / 0.55), transparent 70%),
+      radial-gradient(45% 60% at 0% 0%, rgb(156 0 21 / 0.4), transparent 70%),
+      linear-gradient(135deg, #15171a 0%, #1d0f13 40%, #4a0610 75%, #7a0012 100%);
+  }
+
+  /* Same palette as the footer, at low strength, for light panels */
+  .footer-gradient-light {
+    background-color: #fff;
+    background-image:
+      radial-gradient(55% 70% at 100% 100%, rgb(196 0 27 / 0.14), transparent 70%),
+      radial-gradient(45% 60% at 0% 0%, rgb(156 0 21 / 0.08), transparent 70%),
+      linear-gradient(135deg, rgb(21 23 26 / 0.04) 0%, rgb(29 15 19 / 0.03) 40%, rgb(74 6 16 / 0.07) 75%, rgb(122 0 18 / 0.12) 100%);
   }
 
   /* Product descriptions imported from Shopify */
@@ -469,13 +479,11 @@
   background-color: #f5f5f2;
   background-image:
     radial-gradient(55% 900px at 0% 0%, rgb(156 0 21 / 0.06), transparent 70%),
-    radial-gradient(45% 800px at 100% 12%, rgb(254 189 23 / 0.09), transparent 70%),
     radial-gradient(rgb(21 23 26 / 0.075) 1px, transparent 1.3px);
   background-size:
     100% 1800px,
-    100% 1800px,
     22px 22px;
-  background-repeat: no-repeat, no-repeat, repeat;
+  background-repeat: no-repeat, repeat;
 }
 
 /* 21st.dev-style marquee: two identical tracks slide left by their own width plus the gap */
@@ -635,6 +643,21 @@
   0% { transform: scale(0.85); }
   60% { transform: scale(1.08); }
   100% { transform: scale(1); }
+}
+
+/* ---------- "All products" tile: floating product mosaic ---------- */
+.all-thumb {
+  animation: all-float 4s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -0.7s);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.group:hover .all-thumb {
+  animation-play-state: paused;
+  transform: translateY(-4px) rotate(calc((var(--i, 0) - 2.5) * 2deg)) scale(1.06);
+}
+@keyframes all-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
 /* ---------- The Brand Edit (magazine spread) ---------- */

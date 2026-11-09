@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Icon } from '@/components/Icons';
+import { Icon, type IconName } from '@/components/Icons';
 import { Breadcrumbs, SectionHead } from '@/components/Section';
-import { brandStrip, site, waLink } from '@/data/site';
+import { brandStrip, industries, site, waLink } from '@/data/site';
 import { collections, products } from '@/lib/catalog';
 
 export const metadata: Metadata = {
@@ -118,11 +118,28 @@ export default function AboutPage() {
 
       <section className="py-24">
         <div className="wrap">
+          <SectionHead title="Industries We Serve" intro="High-quality hardware, tools, industrial supplies and safety products for businesses across many industries." />
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {industries.map((it) => (
+              <li key={it.title} className="reveal flex flex-col gap-3 rounded-2xl bg-white p-6 ring-1 ring-line-soft">
+                <span className="grid size-10 place-items-center rounded-full bg-accent-soft text-accent">
+                  <Icon name={it.icon as IconName} size={19} />
+                </span>
+                <span className="text-[16px] font-semibold">{it.title}</span>
+                <span className="text-[14.5px] leading-relaxed text-muted">{it.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="border-t border-line bg-white py-24">
+        <div className="wrap">
           <SectionHead title="Brands We Supply" intro={`${collections.filter((c) => c.kind === 'brand').length} brand collections in our catalog.`} />
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
             {brandStrip.map((b) => (
               <li key={b.handle}>
-                <Link href={`/collections/${b.handle}/`} className="logo-tile card lift grid h-24 place-items-center p-4" aria-label={`Shop ${b.name} products`}>
+                <Link href={`/collections/${b.handle}/`} className="card lift grid h-24 place-items-center p-4" aria-label={`Shop ${b.name} products`}>
                   <img src={`/brands/${b.handle}.png`} alt={b.name} className="max-h-10 w-auto max-w-full object-contain" loading="lazy" />
                 </Link>
               </li>

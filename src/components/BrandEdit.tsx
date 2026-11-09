@@ -87,8 +87,8 @@ export function BrandEdit({ issues }: { issues: EditIssue[] }) {
           <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-[45%] z-10 hidden w-10 -translate-x-1/2 bg-[linear-gradient(90deg,transparent,rgba(21,23,26,.06)_50%,transparent)] lg:block" />
 
           {/* Left page: the brand */}
-          <div className="relative flex min-h-[360px] flex-col justify-between gap-8 overflow-hidden p-6 sm:p-10" style={{ background: issue.bg }}>
-            <span aria-hidden="true" className="be-mark pointer-events-none absolute -bottom-[0.2em] -right-[0.05em] whitespace-nowrap text-[clamp(120px,14vw,200px)] font-extrabold leading-none tracking-[-0.06em] text-[var(--accent)] opacity-[0.14]">
+          <div className="footer-gradient-light relative flex min-h-[360px] flex-col justify-between gap-8 overflow-hidden p-6 sm:p-10">
+            <span aria-hidden="true" className="be-mark pointer-events-none absolute -bottom-[0.2em] -right-[0.05em] whitespace-nowrap text-[clamp(120px,14vw,200px)] font-extrabold leading-none tracking-[-0.06em] text-accent">
               {issue.name}
             </span>
             <span className="be-in relative flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-2" style={d(0.05)}>
@@ -96,9 +96,14 @@ export function BrandEdit({ issues }: { issues: EditIssue[] }) {
               <span>{issue.count} products</span>
             </span>
             <span className="relative flex flex-col items-start gap-5">
-              <span className="be-in flex h-20 items-center rounded-2xl bg-white px-6 shadow-[0_1px_2px_rgba(21,23,26,.08)] sm:h-24 sm:px-7" style={d(0.1)}>
+              <Link
+                href={`/collections/${issue.brand}/`}
+                aria-label={`Shop ${issue.name}`}
+                className="be-in flex h-20 items-center rounded-2xl bg-white px-6 shadow-[0_1px_2px_rgba(21,23,26,.08)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-14px_rgba(21,23,26,.35)] sm:h-24 sm:px-7"
+                style={d(0.1)}
+              >
                 <img src={`/brands/${issue.brand}.png`} alt={`${issue.name} logo`} className="h-12 w-auto max-w-[220px] object-contain sm:h-14" />
-              </span>
+              </Link>
               <span className="be-in text-[clamp(44px,5vw,68px)] font-bold leading-[0.95] tracking-[-0.045em] text-ink" style={d(0.18)}>
                 {issue.name}
               </span>

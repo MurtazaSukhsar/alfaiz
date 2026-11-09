@@ -131,7 +131,7 @@ const SAY: Record<string, Reply | ((ctx: BrainContext) => Reply)> = {
   'my payment failed': contactUs("This website doesn't take online payments — you pay our team after they confirm your order. If you had a problem paying them, please get in touch."),
   'can i get a vat invoice': contactUs('Please ask our sales team for an invoice with your company details when you place your order.'),
   'what is your phone number': {
-    text: [`Phone and WhatsApp: ${site.phone}`, `Email: ${site.email}`],
+    text: [`Phone and WhatsApp: ${site.phone}`, `Email: ${site.email} or ${site.email2}`, `Showroom: ${site.street}, ${site.city}`],
     actions: [call, wa(), mail],
   },
   'what are your opening hours': {
@@ -149,7 +149,10 @@ const SAY: Record<string, Reply | ((ctx: BrainContext) => Reply)> = {
   },
   'i want to talk to a person': contactUs('Of course — our sales team is on WhatsApp and phone.'),
   'i want to make a complaint': contactUs("I'm sorry to hear that. Please tell our team what happened — WhatsApp or email is best so they have the details in writing.", 'Hello Al Faiz, I would like to make a complaint:'),
-  'i want a bulk price': NO_PRICE,
+  'i want a bulk price': {
+    ...NO_PRICE,
+    actions: [{ kind: 'link', label: 'Bulk & special request form', href: '/pages/bulk-special-product-request/', icon: 'arrow' }, ...(NO_PRICE.actions ?? [])],
+  },
   'can i get a discount': NO_PRICE,
   'what offers do you have': NO_PRICE,
   'is there a warranty': {
@@ -226,7 +229,7 @@ const SAY: Record<string, Reply | ((ctx: BrainContext) => Reply)> = {
       { label: 'Cart — review items and check out', href: '/cart/' },
       { label: 'About us', href: '/pages/about-us/' },
       { label: 'Contact & map', href: '/pages/contact/' },
-      { label: 'FAQ', href: '/#faq' },
+      { label: 'FAQ — answers to common questions', href: '/pages/faq/' },
     ],
   },
   'this is useless': {

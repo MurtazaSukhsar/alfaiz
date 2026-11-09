@@ -19,6 +19,8 @@ export const site = {
   instagram: 'https://www.instagram.com/alfaiz.tools/',
   instagramHandle: '@alfaiz.tools',
   hours: '[OPENING HOURS]',
+  /** Messages in the top announcement bar (from the live store). */
+  announcements: ['Your one-stop online store for tools and equipment in the UAE', 'Supplying quality tools & equipment to businesses across the GCC'],
   since: 2019,
   exportCountries: ['Oman', 'Saudi Arabia', 'Iraq', 'the Maldives', 'Congo', 'Kenya', 'Mauritius'],
   credit: { name: 'Farwings', url: 'https://www.farwingstech.com' },
@@ -43,6 +45,9 @@ export const ranges = [
   { handle: 'safety-products', title: 'Safety Products', image: '/images/ranges/safety-products.jpg' },
 ];
 
+/** Other store categories (live site "Shop by Collection"), shown under the category grid. */
+export const moreCategories = ['caster-wheels', 'pressure-washers', 'water-pumps', 'generator', 'engines', 'adhesives-sealants', 'packaging-and-sealing', 'mesh', 'welding'];
+
 /** Scrolling "Shop by brand" logos. Each links to /collections/<handle>/. Logos live in public/brands. */
 export const brandStrip = [
   { handle: 'dewalt', name: 'DeWALT' },
@@ -61,7 +66,7 @@ export const brandStrip = [
   { handle: 'vaultex', name: 'Vaultex' },
 ];
 
-/** Home hero slider: one slide per brand. `products` are Shopify handles shown left, centre, right. */
+/** Home hero slider: one slide per brand, in that brand's own colours (also used by the Brand Edit). `products` are Shopify handles shown left, centre, right. */
 export const heroSlides = [
   {
     brand: 'dewalt',
@@ -268,29 +273,140 @@ export const industries = [
   { icon: 'construction', title: 'Construction', text: 'Hardware, power tools, fasteners and site supplies.' },
   { icon: 'factory', title: 'Manufacturing', text: 'Industrial tools, maintenance equipment and consumables.' },
   { icon: 'drop', title: 'Oil & Gas', text: 'Heavy-duty hardware, safety equipment and industrial products.' },
-  { icon: 'anchor', title: 'Marine', text: 'Corrosion-resistant fasteners, tools and marine hardware.' },
-  { icon: 'bolt', title: 'Electrical', text: 'Electrical tools, accessories and installation supplies.' },
+  { icon: 'anchor', title: 'Marine & Shipbuilding', text: 'Corrosion-resistant fasteners, tools and marine hardware.' },
+  { icon: 'bolt', title: 'Electrical Contractors', text: 'Electrical tools, accessories and installation supplies.' },
   { icon: 'fan', title: 'HVAC', text: 'Installation tools, accessories and maintenance supplies.' },
   { icon: 'car', title: 'Automotive', text: 'Workshop tools, lubricants and repair equipment.' },
-  { icon: 'home', title: 'DIY & Home', text: 'Quality tools and hardware for homes and small projects.' },
+  { icon: 'home', title: 'DIY & Home Improvement', text: 'Quality tools and hardware for homes and small projects.' },
 ] as const;
 
+/** Customer reviews shown on the live store. */
 export const reviews = [
-  { name: 'Arif', text: 'Widest range of DeWALT products available with them.' },
-  { name: 'Mohammad', text: 'A great place to find a wide range of products in one location.' },
   { name: 'Huzaifa', text: 'Excellent quality products.' },
+  { name: 'Mohammad', text: 'A great place to find a wide range of products in one location.' },
+  { name: 'Arif', text: 'Widest range of DeWALT products available with them.' },
+  { name: 'Diaa Alhalbi', text: 'Good.' },
 ];
 
 export const faqs = [
+  { q: 'Where is Al Faiz Electric & Hardware TR. L.L.C located?', a: 'Our store is located on BMW Road, Industrial Area 1, Sharjah, United Arab Emirates. Visit Al Faiz Electric & Hardware TR. L.L.C for quality electrical and hardware tools.' },
+  { q: 'What are the payment terms at Al Faiz Electric & Hardware TR. L.L.C?', a: 'We accept Cash, Credit Card, Bank Transfer, Cheque (Post Delivery), and Advance Payment Before Delivery.' },
+  { q: 'Do you offer delivery services across the UAE?', a: 'Yes, Al Faiz Electric & Hardware TR. L.L.C provides delivery service across the UAE. Terms and conditions apply.' },
+  { q: 'Do your products come with a warranty?', a: 'Yes, products eligible for a manufacturer warranty come with service warranty only. Spare parts are chargeable.' },
   {
     q: 'What does Al Faiz Electric & Hardware supply?',
     a: 'Power tools, air compressors, non-sparking tools, pneumatic tools, fasteners, welding consumables, mesh, safety products and more — from brands including DeWALT, Makita, Bosch, Milwaukee, ABAC and FIAC.',
   },
-  { q: 'Where is your showroom?', a: 'BMW Road, Industrial Area 1, Sharjah, United Arab Emirates.' },
-  { q: 'What payment methods do you accept?', a: 'Cash, credit card, bank transfer, cheque (post delivery) and advance payment before delivery.' },
-  { q: 'Do you deliver across the UAE?', a: 'Yes, we deliver across the UAE. Terms and conditions apply.' },
-  { q: 'Do products come with a warranty?', a: 'Products eligible for a manufacturer warranty come with service warranty only. Spare parts are chargeable.' },
   { q: 'Do you supply outside the UAE?', a: 'Yes — we supply clients in Oman, Saudi Arabia, Iraq, the Maldives, Congo, Kenya and Mauritius.' },
+];
+
+/** Full FAQ page (/pages/faq/), grouped by topic. Answers stick to facts the business has confirmed —
+ *  anything case-by-case (returns, delivery times, charges) points to the sales team. */
+export type FaqItem = { q: string; a: string; links?: { label: string; href: string; external?: boolean }[] };
+export type FaqGroup = { id: string; title: string; icon: 'cart' | 'truck' | 'card' | 'shield' | 'pin'; items: FaqItem[] };
+
+const hoursKnown = !/^\[.*\]$/.test(site.hours.trim());
+
+export const faqGroups: FaqGroup[] = [
+  {
+    id: 'ordering',
+    title: 'Ordering & cart',
+    icon: 'cart',
+    items: [
+      {
+        q: 'How do I place an order on the website?',
+        a: 'Open a product, choose the quantity and press “Add to cart”. When you are ready, open your cart, check the quantities, add a note (delivery location, company name, deadline) and press “Checkout on WhatsApp” or “Checkout by email”. Our sales team confirms price, stock and delivery, and then you pay.',
+        links: [{ label: 'Open your cart', href: '/cart/' }],
+      },
+      {
+        q: 'Why don’t I see prices on the website?',
+        a: 'Prices are confirmed by our sales team for your exact quantity and delivery location, so products show “Price on request”. Add what you need to your cart and check out — we reply with prices for the whole list.',
+      },
+      {
+        q: 'Do I need to create an account?',
+        a: 'No. There is no sign-up. Your cart is saved on your own device until you clear it, and your details are only shared when you send your order on WhatsApp or email.',
+      },
+      {
+        q: 'Can I order in bulk or send a BOQ?',
+        a: 'Yes. Add the items to your cart and check out in one go, or send us your full list or BOQ on WhatsApp or email and we will quote everything together.',
+        links: [{ label: 'Send a list on WhatsApp', href: waLink('Hello Al Faiz, please quote for my list:'), external: true }],
+      },
+      {
+        q: 'Can I change or cancel an order?',
+        a: 'Message our sales team as soon as possible with your name and order details, and they will update or cancel it for you.',
+      },
+      {
+        q: 'A product shows “Sold out”. Can I still get it?',
+        a: 'Send us the product name or link and our team will tell you the lead time.',
+      },
+    ],
+  },
+  {
+    id: 'delivery',
+    title: 'Delivery & export',
+    icon: 'truck',
+    items: [
+      { q: 'Do you offer delivery services across the UAE?', a: 'Yes, Al Faiz Electric & Hardware TR. L.L.C provides delivery service across the UAE. Terms and conditions apply. Delivery time and any delivery charges are confirmed by our sales team together with your order.' },
+      { q: 'Do you supply outside the UAE?', a: `Yes — we supply clients in ${site.exportCountries.slice(0, -1).join(', ')} and ${site.exportCountries.at(-1)}. Contact us with your list and destination.` },
+      { q: 'How do I track my order?', a: 'Orders are handled personally by our sales team rather than through online tracking. Message them with your name and order details for an update.' },
+    ],
+  },
+  {
+    id: 'payment',
+    title: 'Payment & invoices',
+    icon: 'card',
+    items: [
+      { q: 'What are the payment terms?', a: 'We accept Cash, Credit Card, Bank Transfer, Cheque (Post Delivery), and Advance Payment Before Delivery.' },
+      { q: 'Can I pay online on the website?', a: 'No — there is no online card payment on this website. You pay after our sales team has confirmed your order, using one of the methods above.' },
+      { q: 'Can I get an invoice for my company?', a: 'Yes, ask our sales team for an invoice with your company details when you place your order.' },
+    ],
+  },
+  {
+    id: 'products',
+    title: 'Products & warranty',
+    icon: 'shield',
+    items: [
+      {
+        q: 'What does Al Faiz Electric & Hardware supply?',
+        a: 'Power tools, air compressors, non-sparking tools, pneumatic tools, fasteners, welding consumables, mesh, safety products and more — from brands including DeWALT, Makita, Bosch, Milwaukee, ABAC and FIAC.',
+        links: [{ label: 'Browse all products', href: '/collections/all/' }],
+      },
+      {
+        q: 'Which brands do you stock?',
+        a: `${brandStrip.map((b) => b.name).join(', ')} and more. Each brand has its own page listing everything we carry from them.`,
+        links: [{ label: 'See our brands', href: '/#brands' }],
+      },
+      { q: 'Do your products come with a warranty?', a: 'Yes, products eligible for a manufacturer warranty come with service warranty only. Spare parts are chargeable. Ask our team to confirm the warranty for a specific product.' },
+      {
+        q: 'What are non-sparking tools?',
+        a: 'Hand tools made from brass, aluminium bronze and beryllium copper for hazardous areas such as oil & gas, marine and petrochemical sites, where a stray spark is a real risk.',
+        links: [{ label: 'Shop non-sparking tools', href: '/collections/non-sparking-tools/' }],
+      },
+      { q: 'Can you source a product that isn’t on the website?', a: 'Send us the product name or model number on WhatsApp and our team will check whether we can supply it.' },
+    ],
+  },
+  {
+    id: 'company',
+    title: 'Showroom & contact',
+    icon: 'pin',
+    items: [
+      {
+        q: 'Where is Al Faiz Electric & Hardware TR. L.L.C located?',
+        a: `Our store is located on BMW Road, Industrial Area 1, Sharjah, United Arab Emirates (${site.street}). Visit us for quality electrical and hardware tools.`,
+        links: [{ label: 'Open in Google Maps', href: site.mapsUrl, external: true }],
+      },
+      {
+        q: 'What are your opening hours?',
+        a: hoursKnown ? `${site.hours}.` : `Please call or WhatsApp ${site.phone} to confirm our opening hours before you visit.`,
+      },
+      {
+        q: 'How can I contact you?',
+        a: `Call or WhatsApp ${site.phone}, email ${site.email} or ${site.email2}, or follow us on Instagram ${site.instagramHandle}.`,
+        links: [{ label: 'Contact page', href: '/pages/contact/' }],
+      },
+      { q: 'Which industries do you supply?', a: `Construction, manufacturing, oil & gas, marine & shipbuilding, electrical contractors, HVAC, automotive and DIY & home improvement — across the UAE and GCC since ${site.since}.` },
+    ],
+  },
 ];
 
 export const footerRanges = [

@@ -6,7 +6,7 @@ import { LogoMark } from './Logo';
 export function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer id="contact" className="grid-pattern text-[#C9CCD1]">
+    <footer id="contact" className="footer-gradient text-[#D3D5DA]">
       <div className="wrap flex flex-wrap items-center justify-between gap-x-10 gap-y-6 py-16">
         <div className="flex max-w-[560px] flex-[1_1_460px] flex-col gap-2.5">
           <h2 className="text-[clamp(30px,3.6vw,48px)] font-semibold leading-[1.05] tracking-[-0.03em] text-white">Need a tool quote today?</h2>
@@ -63,8 +63,9 @@ export function Footer() {
             <Link href="/pages/about-us/" className="hover:text-white">About Us</Link>
             <Link href="/collections/all/" className="hover:text-white">All Products</Link>
             <Link href="/#brands" className="hover:text-white">Brands</Link>
-            <Link href="/#faq" className="hover:text-white">FAQ</Link>
+            <Link href="/pages/faq/" className="hover:text-white">FAQ</Link>
             <Link href="/cart/" className="hover:text-white">Cart</Link>
+            <Link href="/pages/bulk-special-product-request/" className="hover:text-white">Bulk &amp; Special Requests</Link>
             <Link href="/pages/contact/" className="hover:text-white">Contact</Link>
           </nav>
 
@@ -77,6 +78,10 @@ export function Footer() {
             <a href={`mailto:${site.email}`} className="flex items-center gap-2.5 hover:text-white">
               <Icon name="mail" size={16} className="shrink-0" />
               {site.email}
+            </a>
+            <a href={`mailto:${site.email2}`} className="flex items-center gap-2.5 hover:text-white">
+              <Icon name="mail" size={16} className="shrink-0" />
+              {site.email2}
             </a>
             <a href={site.mapsUrl} target="_blank" rel="noopener" className="flex items-start gap-2.5 hover:text-white">
               <Icon name="pin" size={16} className="mt-0.5 shrink-0" />
@@ -93,7 +98,10 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col items-center gap-1.5 border-t border-white/10 pt-6 text-center text-[13px] text-[#9A9FA6]">
           <span>
-            © {year} {site.legal} All rights reserved.
+            © {year} {site.legal} All rights reserved. ·{' '}
+            <Link href="/policies/privacy-policy/" className="text-[#C9CCD1] hover:text-white">
+              Privacy policy
+            </Link>
           </span>
           <span>
             Developed by{' '}

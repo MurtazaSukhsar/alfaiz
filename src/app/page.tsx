@@ -1,6 +1,6 @@
 import { BrandMarquee, Categories, Edit, Faq, Hero, Testimonials, TrustStrip } from '@/components/home/Sections';
 import { JsonLd } from '@/components/Section';
-import { faqs, site } from '@/data/site';
+import { site } from '@/data/site';
 
 export const metadata = { alternates: { canonical: '/' } };
 
@@ -27,15 +27,8 @@ export default function Home() {
           sameAs: [site.instagram],
         }}
       />
-      <JsonLd
-        data={{
-          '@context': 'https://schema.org',
-          '@type': 'FAQPage',
-          mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
-        }}
-      />
       <div className="home-canvas">
-        <h1 className="sr-only">Al Faiz Electric &amp; Hardware — tools and industrial supplies in Sharjah, UAE</h1>
+        <h1 className="sr-only">Al Faiz Electric &amp; Hardware — tools that work as hard as you do. Tools and industrial supplies in Sharjah, UAE</h1>
         <Hero />
         <BrandMarquee />
         <Categories />

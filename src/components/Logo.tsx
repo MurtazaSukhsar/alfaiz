@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 
 /** The Al Faiz mark: crimson F with FAIZ set beneath. */
@@ -23,7 +25,18 @@ export function LogoMark({ className, fill = '#9C0015', text = 'currentColor' }:
 
 export function Logo() {
   return (
-    <Link href="/" aria-label="Al Faiz Electric & Hardware, home" className="flex shrink-0 items-center gap-2.5 text-ink">
+    <Link
+      href="/"
+      aria-label="Al Faiz Electric & Hardware, home"
+      onClick={(e) => {
+        if (window.location.pathname === '/') {
+          e.preventDefault();
+          window.history.replaceState(null, '', '/');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }}
+      className="flex shrink-0 items-center gap-2.5 text-ink transition hover:opacity-80"
+    >
       <LogoMark className="h-12 w-[30px] shrink-0" />
       <span className="ml-1 hidden flex-col gap-0.5 border-l border-[#E2E3DF] pl-3 leading-tight sm:flex lg:hidden xl:flex">
         <span className="text-[15px] font-bold">Electric &amp; Hardware</span>
