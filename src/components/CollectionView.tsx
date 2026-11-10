@@ -141,9 +141,11 @@ export function CollectionView({
               <option value="za">Name: Z–A</option>
             </select>
           </div>
-          <p className="w-full text-sm text-muted" aria-live="polite">
-            {filtered.length === items.length ? `${items.length} products` : `${filtered.length} of ${items.length} products`}
-          </p>
+          {filtered.length !== items.length && (
+            <p className="w-full text-sm text-muted" aria-live="polite">
+              Showing filtered results
+            </p>
+          )}
         </div>
 
         {filtered.length === 0 ? (
@@ -192,12 +194,11 @@ function FacetGroup({ title, facets, selected, onToggle }: { title: string; face
             <input type="checkbox" checked={selected.includes(f.handle)} onChange={() => onToggle(f.handle)} className="size-[18px] accent-ink" />
             {f.title}
           </span>
-          <span className="text-[13px] text-muted">{f.count}</span>
         </label>
       ))}
       {facets.length > 8 && (
         <button type="button" onClick={() => setAll((v) => !v)} className="mt-1 min-h-10 text-sm font-semibold text-accent">
-          {all ? 'Show less' : `Show all ${facets.length}`}
+          {all ? 'Show less' : 'Show all'}
         </button>
       )}
     </fieldset>

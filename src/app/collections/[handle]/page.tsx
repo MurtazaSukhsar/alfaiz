@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { CollectionView } from '@/components/CollectionView';
 import { Breadcrumbs, JsonLd } from '@/components/Section';
-import { brandStrip, site } from '@/data/site';
+import { brandLogo, brandStrip, site } from '@/data/site';
 import { collections, facetsFor, getCollection, productsIn, toListItem } from '@/lib/catalog';
 
 type Params = { params: Promise<{ handle: string }> };
@@ -33,8 +33,8 @@ function info(handle: string) {
       firstPara.length > 40
         ? firstPara
         : c.kind === 'brand'
-          ? `Genuine ${c.title} tools and equipment, supplied across the UAE from our Sharjah showroom.`
-          : `${c.title} from leading brands, supplied across the UAE from our Sharjah showroom.`,
+          ? `Genuine ${c.title} tools and equipment, supplied across the UAE.`
+          : `${c.title} from leading brands, supplied across the UAE.`,
   };
 }
 
@@ -82,7 +82,7 @@ export default async function CollectionPage({ params }: Params) {
             </div>
             {hasLogo && (
               <span className="grid h-24 w-56 place-items-center rounded-2xl border border-line bg-white p-4">
-                <img src={`/brands/${handle}.png`} alt={`${i.title} logo`} className="max-h-14 w-auto object-contain" />
+                <img src={brandLogo(handle)} alt={`${i.title} logo`} className="max-h-14 w-auto object-contain" />
               </span>
             )}
           </div>

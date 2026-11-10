@@ -132,7 +132,7 @@ export function Header({ categories, brands, total }: { categories: Facet[]; bra
                       isCurrent(l.href) ? 'font-semibold text-ink' : 'font-medium text-ink-2'
                     }`}
                   >
-                    {l.label === 'Products' ? `All products (${total})` : l.label}
+                    {l.label === 'Products' ? 'All products' : l.label}
                     <Icon name="chev" size={16} strokeWidth={2} className="text-muted" />
                   </Link>
                 </li>
@@ -211,7 +211,6 @@ function ProductsMenu({ categories, brands, total }: { categories: Facet[]; bran
               <li key={c.handle}>
                 <Link href={`/collections/${c.handle}/`} className="flex min-h-9 items-center justify-between gap-3 text-[14px] text-ink-2 hover:text-accent">
                   {c.title}
-                  <span className="text-xs text-muted">{c.count}</span>
                 </Link>
               </li>
             ))}
@@ -224,13 +223,12 @@ function ProductsMenu({ categories, brands, total }: { categories: Facet[]; bran
               <li key={c.handle}>
                 <Link href={`/collections/${c.handle}/`} className="flex min-h-9 items-center justify-between gap-3 text-[14px] text-ink-2 hover:text-accent">
                   {c.title}
-                  <span className="text-xs text-muted">{c.count}</span>
                 </Link>
               </li>
             ))}
           </ul>
           <Link href="/collections/all/" className="nudge-host mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-accent">
-            All {total} products
+            Explore all products
             <Icon name="arrow" size={15} strokeWidth={2.2} className="nudge" />
           </Link>
         </div>

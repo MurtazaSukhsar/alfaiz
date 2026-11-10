@@ -10,13 +10,22 @@ for (const file of ['.env.local', '.env']) {
   }
 }
 
+// The project URL and publishable key are public (they are also used by the admin panel in the browser).
+// With only these, the scripts can READ published data — enough for `npm run dev` / `npm run build`
+// on any machine or on Vercel. Writing (supabase:push) needs SUPABASE_SECRET_KEY in .env.local.
+export const PUBLIC_SUPABASE_URL = 'https://gwtpayzrhcgvdppmcixy.supabase.co';
+export const PUBLIC_SUPABASE_KEY = 'sb_publishable_QDovLeWFBGCgD79cMhtQtw_H4EvkQx4';
+
+const secret = process.env.SUPABASE_SECRET_KEY || '';
 export const supabase = {
-  url: (process.env.SUPABASE_URL || '').replace(/\/$/, ''),
-  key: process.env.SUPABASE_SECRET_KEY || '',
+  url: (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || PUBLIC_SUPABASE_URL).replace(/\/$/, ''),
+  key: secret || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || PUBLIC_SUPABASE_KEY,
 };
 export const hasSupabase = !!(supabase.url && supabase.key);
+/** true when the secret key is set (needed to write with supabase:push) */
+export const hasSecret = !!secret;
 
-/** Call the Supabase REST API with the secret key (server-side scripts only — never ship this key). */
+/** Call the Supabase REST API (secret key when set, otherwise the public read-only key). Scripts only. */
 export async function rest(path, init = {}) {
   const res = await fetch(`${supabase.url}/rest/v1/${path}`, {
     ...init,

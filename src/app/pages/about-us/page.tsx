@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Icon, type IconName } from '@/components/Icons';
 import { Breadcrumbs, SectionHead } from '@/components/Section';
-import { brandStrip, industries, site, waLink } from '@/data/site';
+import { brandLogo, brandStrip, industries, site, waLink } from '@/data/site';
 import { collections, products } from '@/lib/catalog';
 
 export const metadata: Metadata = {
@@ -29,7 +29,7 @@ const reasons = [
 export default function AboutPage() {
   const stats = [
     { n: String(site.since), l: 'Supplying industry since' },
-    { n: String(products.length), l: 'Products listed' },
+    { n: '24/7', l: 'Quotes on WhatsApp' },
     { n: String(brandStrip.length), l: 'Global brands' },
     { n: String(site.exportCountries.length), l: 'Export countries' },
   ];
@@ -70,7 +70,7 @@ export default function AboutPage() {
             <span className="eyebrow text-accent">Our story</span>
             <h2 className="text-[clamp(28px,3.2vw,40px)] font-bold leading-[1.1] tracking-[-0.02em]">Quality products, fair pricing, dependable service.</h2>
             <p className="text-[17px] leading-relaxed text-ink-2">
-              From our showroom on BMW Road in Sharjah’s Industrial Area 1, we supply contractors, workshops and facilities across the Emirates.
+              We supply contractors, workshops and facilities across the Emirates, and export across the GCC and Africa.
               Our reach goes beyond the UAE, with clients in {site.exportCountries.slice(0, -1).join(', ')} and {site.exportCountries.at(-1)}.
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
@@ -140,7 +140,7 @@ export default function AboutPage() {
             {brandStrip.map((b) => (
               <li key={b.handle}>
                 <Link href={`/collections/${b.handle}/`} className="card lift grid h-24 place-items-center p-4" aria-label={`Shop ${b.name} products`}>
-                  <img src={`/brands/${b.handle}.png`} alt={b.name} className="max-h-10 w-auto max-w-full object-contain" loading="lazy" />
+                  <img src={brandLogo(b.handle)} alt={b.name} className="max-h-10 w-auto max-w-full object-contain" loading="lazy" />
                 </Link>
               </li>
             ))}

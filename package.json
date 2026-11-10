@@ -6,12 +6,13 @@
   "scripts": {
     "predev": "node scripts/supabase-pull.mjs",
     "dev": "next dev",
+    "dev:offline": "next dev",
     "prebuild": "node scripts/supabase-pull.mjs",
     "build": "next build --webpack",
     "start": "npx serve@14.2.5 out",
     "sync": "node scripts/sync-catalog.mjs",
     "typecheck": "tsc --noEmit",
-    "supabase:pull": "node scripts/supabase-pull.mjs",
+    "supabase:pull": "node scripts/supabase-pull.mjs --force",
     "supabase:push": "node scripts/supabase-push.mjs"
   },
   "dependencies": {

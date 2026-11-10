@@ -148,7 +148,7 @@ export function SearchBox({
           id="search-results"
           role="listbox"
           aria-label="Search suggestions"
-          className="anim-drop absolute inset-x-0 top-[calc(100%+10px)] lg:left-auto lg:w-[460px] z-50 flex max-h-[min(480px,70vh)] flex-col gap-1 overflow-y-auto rounded-[14px] border border-line bg-white p-2.5 shadow-[0_18px_40px_rgba(21,23,26,.14)]"
+          className="anim-drop absolute inset-x-0 top-[calc(100%+10px)] lg:left-auto lg:w-[460px] z-50 flex max-h-[min(480px,70vh)] flex-col gap-1 overflow-y-auto rounded-[10px] border border-line bg-white p-2.5 shadow-[0_18px_40px_rgba(21,23,26,.14)]"
         >
           {!res && !failed && <p className="px-3 py-4 text-sm text-muted">Searching…</p>}
           {failed && <p className="px-3 py-4 text-sm text-muted">Search is unavailable right now — press Enter to see results.</p>}

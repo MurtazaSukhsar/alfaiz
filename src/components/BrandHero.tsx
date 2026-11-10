@@ -1,186 +1,87 @@
-'use client';
-
 import Link from 'next/link';
-import { useEffect, useState, type CSSProperties } from 'react';
 import { site, waLink } from '@/data/site';
 import { Icon } from './Icons';
 
-export type HeroBrand = {
-  brand: string;
-  name: string;
-  tagline: string;
-  count: number;
-  products: { href: string; label: string; name: string; image: string }[];
-};
-
-const ROTATE_MS = 5000;
-const d = (s: number) => ({ '--d': `${s}s` }) as CSSProperties;
-
-/** Product spots on the stage: one hero tool and two supporting ones. */
-const SPOTS = [
-  {
-    box: 'left-[27%] top-0 h-[74%] w-[46%] sm:left-[20%] sm:top-[6%] sm:h-[62%] sm:w-[60%]',
-    label: 'left-1/2 -translate-x-1/2 -bottom-2 sm:-bottom-1',
-  },
-  { box: 'left-0 bottom-[4%] h-[50%] w-[31%] sm:bottom-[2%] sm:h-[38%] sm:w-[38%]', label: 'left-0 -bottom-3 sm:left-2 sm:-bottom-1' },
-  { box: 'right-0 bottom-[4%] h-[50%] w-[31%] sm:bottom-[8%] sm:h-[40%] sm:w-[36%]', label: 'right-0 -bottom-3 sm:right-2 sm:-bottom-1' },
-];
+export type HeroTile = { href: string; brand: string; label: string; name: string; image: string };
 
 /**
- * Home hero: brand name and real products, quote first.
- * The headline cycles through the brands every 5s; each brand shows three of its tools and a
- * quote button that opens WhatsApp with that brand already written.
+ * Home hero: headline and buttons on the left, a neat grid of six real products
+ * from different brands on the right. Nothing rotates; every tile opens its product.
  */
-export function BrandHero({ brands, total, brandTotal }: { brands: HeroBrand[]; total: number; brandTotal: number }) {
-  const [index, setIndex] = useState(0);
-  const [hold, setHold] = useState(false);
-  const n = brands.length;
-  const b = brands[index];
-
-  useEffect(() => {
-    if (hold || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const t = window.setTimeout(() => setIndex((i) => (i + 1) % n), ROTATE_MS);
-    return () => window.clearTimeout(t);
-  }, [index, hold, n]);
-
+export function BrandHero({ tiles, badge, title1, title2, text }: { tiles: HeroTile[]; badge: string; title1: string; title2: string; text: string }) {
   return (
     <section aria-labelledby="hero-title" className="pt-4 sm:pt-6">
       <div className="wrap">
-        <div
-          className="footer-gradient-light relative isolate grid overflow-hidden rounded-[28px] ring-1 ring-line-soft lg:min-h-[560px] lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
-          onTouchStart={() => setHold(true)}
-          onTouchEnd={() => setHold(false)}
-        >
-          {/* faint brand name across the back */}
-          <span
-            aria-hidden="true"
-            key={`mark-${b.brand}`}
-            className="bh-mark pointer-events-none absolute -bottom-[0.18em] right-[-0.04em] -z-10 select-none whitespace-nowrap text-[clamp(120px,17vw,250px)] font-extrabold leading-none tracking-[-0.06em] text-accent/[0.06]"
-          >
-            {b.name}
-          </span>
-
+        <div className="grid overflow-hidden rounded-[14px] bg-white ring-1 ring-line-soft lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           {/* Words */}
-          <div className="flex min-w-0 flex-col justify-center gap-4 px-5 pb-6 pt-1 sm:gap-6 sm:p-10 sm:pb-8 lg:p-12 lg:pr-4">
-            <span className="hidden w-fit items-center gap-2 rounded-full bg-white px-3 py-1.5 sm:inline-flex text-[12.5px] font-semibold text-ink shadow-[0_1px_2px_rgba(21,23,26,.06)] ring-1 ring-line-soft">
+          <div className="flex min-w-0 flex-col justify-center gap-4 px-5 pb-6 pt-5 sm:gap-6 sm:p-10 lg:p-12 lg:pr-6">
+            {badge && <span className="hidden w-fit items-center gap-2 rounded-md bg-[#F5F5F3] px-3 py-1.5 text-[12.5px] font-semibold text-ink sm:inline-flex">
               <span className="size-1.5 rounded-full bg-accent" />
-              Genuine brands · Quotes in minutes
-            </span>
+              {badge}
+            </span>}
 
             <h2 id="hero-title" className="text-[clamp(34px,4.6vw,64px)] font-bold leading-[0.98] tracking-[-0.045em] text-ink">
-              <span className="block">Genuine</span>
-              <span className="relative block h-[1.02em] overflow-hidden">
-                <span key={b.brand} className="bh-word absolute inset-x-0 top-0 block whitespace-nowrap text-accent">
-                  {b.name}
-                </span>
-              </span>
-              <span className="block">tools, quoted fast.</span>
+              <span className="block">{title1}</span>
+              <span className="block text-accent">{title2}</span>
             </h2>
 
-            <p key={`t-${b.brand}`} className="be-in max-w-[440px] text-[15px] leading-relaxed text-ink-2 sm:text-[17px]" style={d(0.1)}>
-              {b.tagline} Send us your list — we reply with price, stock and delivery.
+            <p className="max-w-[440px] text-[15px] leading-relaxed text-ink-2 sm:text-[17px]">
+              {text}
             </p>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5">
-              <a
-                href={waLink(`Hello Al Faiz, I would like a quote for ${b.name} tools:`)}
-                target="_blank"
-                rel="noopener"
-                className="pill pill-lg fx footer-gradient justify-between text-white max-sm:w-full"
-              >
-                Get a {b.name} quote
+              <Link href="/collections/all/" className="pill pill-lg fx footer-gradient justify-between text-white max-sm:w-full">
+                Explore products
                 <span className="pill-dot bg-white text-accent">
                   <Icon name="arrow" size={15} strokeWidth={2.4} />
                 </span>
+              </Link>
+              <a
+                href={waLink('Hello Al Faiz, I would like a quote for:')}
+                target="_blank"
+                rel="noopener"
+                className="pill pill-lg pill-outline justify-center bg-white max-sm:w-full"
+              >
+                Get a quote
               </a>
-              <Link href={`/collections/${b.brand}/`} className="pill pill-lg pill-outline hidden bg-white sm:inline-flex">
-                See {b.count} {b.name} products
-              </Link>
-              <Link href={`/collections/${b.brand}/`} className="nudge-host inline-flex items-center gap-1.5 self-center text-[14.5px] font-semibold text-ink sm:hidden">
-                See all {b.count} {b.name} products
-                <Icon name="arrow" size={14} strokeWidth={2.2} className="nudge" />
-              </Link>
             </div>
 
-            {/* brand index */}
-            <div className="flex min-w-0 flex-col gap-3 border-t border-ink/[0.08] pt-4 sm:mt-2 sm:pt-5">
-              <ul className="-mx-5 flex items-center gap-x-5 gap-y-2 overflow-x-auto px-5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden" aria-label="Brands">
-                {brands.map((x, i) => {
-                  const on = i === index;
-                  return (
-                    <li key={x.brand}>
-                      <button
-                        type="button"
-                        onClick={() => setIndex(i)}
-                        aria-current={on || undefined}
-                        className={`relative whitespace-nowrap pb-1.5 text-[15px] transition-colors ${on ? 'font-semibold text-ink' : 'font-medium text-muted hover:text-ink'}`}
-                      >
-                        {x.name}
-                        <span className={`absolute inset-x-0 bottom-0 h-[2px] overflow-hidden rounded-full ${on ? 'bg-accent/15' : ''}`}>
-                          {on && !hold && <span key={`p-${index}`} className="be-timer absolute inset-0 origin-left bg-accent" style={{ animationDuration: `${ROTATE_MS}ms` }} />}
-                          {on && hold && <span className="absolute inset-0 bg-accent" />}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-                <li>
-                  <Link href="/collections/all/" className="nudge-host inline-flex items-center gap-1 whitespace-nowrap pb-1.5 text-[15px] font-medium text-accent">
-                    +{Math.max(0, brandTotal - n)} more brands · {total} products
-                    <Icon name="arrow" size={13} strokeWidth={2.4} className="nudge" />
-                  </Link>
-                </li>
-              </ul>
-              <a href={site.phoneHref} className="hidden w-fit items-center gap-2 sm:inline-flex text-[14px] font-semibold text-ink-2 hover:text-accent">
-                <Icon name="phone" size={15} />
-                {site.phone}
-              </a>
-            </div>
+            <a href={site.phoneHref} className="hidden w-fit items-center gap-2 border-t border-line-soft pt-5 text-[14px] font-semibold text-ink-2 hover:text-accent sm:inline-flex">
+              <Icon name="phone" size={15} />
+              {site.phone}
+            </a>
           </div>
 
-          {/* Stage */}
-          <div className="relative order-first h-[300px] sm:h-[420px] lg:order-none lg:h-auto">
-            <Link
-              key={`logo-${b.brand}`}
-              href={`/collections/${b.brand}/`}
-              aria-label={`Shop ${b.name}`}
-              className="bh-prod absolute left-4 top-4 z-20 flex h-14 items-center rounded-2xl bg-white px-4 shadow-[0_10px_30px_-14px_rgba(21,23,26,.35)] ring-1 ring-line-soft transition hover:-translate-y-0.5 sm:left-8 sm:top-8 sm:h-20 sm:px-6"
-              style={d(0.05)}
-            >
-              <img src={`/brands/${b.brand}.png`} alt={`${b.name} logo`} className="h-8 w-auto max-w-[130px] object-contain sm:h-11 sm:max-w-[180px]" />
-            </Link>
-            <span
-              key={`count-${b.brand}`}
-              className="bh-prod absolute right-4 top-5 z-20 rounded-full bg-ink px-3 py-1.5 text-[12.5px] font-semibold text-white sm:right-8 sm:top-9"
-              style={d(0.12)}
-            >
-              {b.count} products
-            </span>
-
-            <div className="absolute inset-x-3 bottom-6 top-[80px] sm:inset-x-8 sm:bottom-8 sm:top-28">
-              {b.products.slice(0, 3).map((p, k) => (
-                <Link key={`${b.brand}-${p.href}`} href={p.href} className={`group absolute ${SPOTS[k].box}`}>
-                  {/* the photo blends into the panel (white background disappears) */}
-                  <span className="bh-prod absolute inset-0 block mix-blend-multiply" style={d(0.1 + k * 0.12)}>
-                    <span aria-hidden="true" className="absolute inset-x-[14%] bottom-[5%] h-[10%] rounded-[50%] bg-ink/15 blur-xl" />
+          {/* Product grid */}
+          <ul className="order-first grid grid-cols-3 gap-2 p-3 sm:gap-3 sm:p-5 lg:order-none lg:p-6 lg:pl-0">
+            {tiles.slice(0, 6).map((t, i) => (
+              <li key={t.href} className="min-w-0">
+                <Link
+                  href={t.href}
+                  title={t.name}
+                  className="group flex h-full flex-col rounded-[10px] bg-[#F4F4F1] p-2 transition duration-300 hover:bg-[#EDEDE9] sm:p-3"
+                >
+                  <span className="grid aspect-square place-items-center p-1 sm:p-3 lg:aspect-[1/0.92]">
                     <img
-                      src={p.image}
-                      alt={p.name}
-                      className="bh-float relative h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.05]"
-                      style={{ animationDelay: `${k * -1.6}s` }}
+                      src={t.image}
+                      alt={t.name}
+                      loading={i < 3 ? 'eager' : 'lazy'}
+                      className="max-h-full max-w-full object-contain mix-blend-multiply transition duration-500 group-hover:scale-[1.07]"
                     />
                   </span>
-                  <span
-                    className={`bh-prod absolute ${SPOTS[k].label} inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-white px-2.5 py-1 text-[11.5px] font-semibold text-ink shadow sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-[12.5px]-[0_8px_20px_-10px_rgba(21,23,26,.4)] ring-1 ring-line-soft transition-colors group-hover:bg-accent group-hover:text-white group-hover:ring-accent`}
-                    style={d(0.25 + k * 0.12)}
-                  >
-                    {p.label}
-                    <Icon name="arrow" size={12} strokeWidth={2.4} />
+                  <span className="mt-1 flex items-end justify-between gap-2">
+                    <span className="flex min-w-0 flex-col leading-tight">
+                      <span className="truncate text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted sm:text-[11.5px]">{t.brand}</span>
+                      <span className="truncate text-[12.5px] font-semibold text-ink sm:text-[15px]">{t.label}</span>
+                    </span>
+                    <span className="hidden size-8 shrink-0 place-items-center rounded-full bg-white text-ink transition duration-300 group-hover:-rotate-45 group-hover:bg-accent group-hover:text-white sm:grid">
+                      <Icon name="arrow" size={13} strokeWidth={2.2} />
+                    </span>
                   </span>
                 </Link>
-              ))}
-            </div>
-          </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

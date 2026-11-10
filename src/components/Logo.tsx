@@ -40,7 +40,7 @@ export function Logo() {
       <LogoMark className="h-12 w-[30px] shrink-0" />
       <span className="ml-1 hidden flex-col gap-0.5 border-l border-[#E2E3DF] pl-3 leading-tight sm:flex lg:hidden xl:flex">
         <span className="text-[15px] font-bold">Electric &amp; Hardware</span>
-        <span className="text-xs text-muted">Sharjah · UAE</span>
+        <span className="text-xs text-muted">Tools &amp; industrial supplies</span>
       </span>
     </Link>
   );

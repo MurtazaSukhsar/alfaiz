@@ -8,13 +8,14 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { Loader } from '@/components/Loader';
 import { QuoteProvider } from '@/components/QuoteProvider';
+import { SiteChrome } from '@/components/SiteChrome';
 import { menuCollections, products } from '@/lib/catalog';
 import { site } from '@/data/site';
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: 'Al Faiz Electric & Hardware | Tools & Industrial Supplies in Sharjah, UAE',
+    default: 'Al Faiz Electric & Hardware | Tools & Industrial Supplies in the UAE',
     template: '%s | Al Faiz Hardware',
   },
   description:
@@ -41,19 +42,25 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               "try{var d=document.documentElement;d.classList.add('has-js');if(sessionStorage.getItem('fz-splash'))d.classList.add('no-splash');else{sessionStorage.setItem('fz-splash','1');setTimeout(function(){d.classList.add('no-splash')},4500)}}catch(e){}",
           }}
         />
-        <Loader />
-        <a
-          href="#main"
-          className="sr-only z-[60] rounded-md bg-ink px-4 py-2 text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
-        >
-          Skip to content
-        </a>
+        <SiteChrome>
+          <Loader />
+          <a
+            href="#main"
+            className="sr-only z-[60] rounded-md bg-ink px-4 py-2 text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+          >
+            Skip to content
+          </a>
+        </SiteChrome>
         <QuoteProvider>
-          <Header categories={menu.categories} brands={menu.brands} total={products.length} />
+          <SiteChrome>
+            <Header categories={menu.categories} brands={menu.brands} total={products.length} />
+          </SiteChrome>
           <main id="main">{children}</main>
-          <Footer />
-          <ChatWidget />
-          <FxRuntime />
+          <SiteChrome>
+            <Footer />
+            <ChatWidget />
+            <FxRuntime />
+          </SiteChrome>
         </QuoteProvider>
       </body>
     </html>

@@ -138,17 +138,17 @@ const SAY: Record<string, Reply | ((ctx: BrainContext) => Reply)> = {
   'my payment failed': contactUs("This website doesn't take online payments — you pay our team after they confirm your order. If you had a problem paying them, please get in touch."),
   'can i get a vat invoice': contactUs('Please ask our sales team for an invoice with your company details when you place your order.'),
   'what is your phone number': {
-    text: [`Phone and WhatsApp: ${site.phone}`, `Email: ${site.email} or ${site.email2}`, `Showroom: ${site.street}, ${site.city}`],
+    text: [`Phone and WhatsApp: ${site.phone}`, `Email: ${site.email} or ${site.email2}`],
     actions: [call, wa(), mail],
   },
   'what are your opening hours': {
     text: hoursKnown
-      ? [`Our showroom hours: ${site.hours}.`, `We're at ${site.street}, ${site.city}.`]
-      : [`Please call or WhatsApp ${site.phone} to confirm today's opening hours before you visit.`, `We're at ${site.street}, ${site.city}.`],
+      ? [`Our showroom hours: ${site.hours}.`]
+      : [`Please call or WhatsApp ${site.phone} to confirm today's opening hours before you visit.`],
     actions: [call, wa(), { kind: 'link', label: 'Open in Maps', href: site.mapsUrl, external: true, icon: 'pin' }],
   },
   'where is your shop located': {
-    text: [`Our showroom: ${site.street}, ${site.city}, ${site.country}.`],
+    text: ['We deliver across the UAE and export to the GCC and Africa.', 'Our showroom address and map are on the Contact page.'],
     actions: [
       { kind: 'link', label: 'Open in Maps', href: site.mapsUrl, external: true, icon: 'pin' },
       { kind: 'link', label: 'Contact page', href: '/pages/contact/', icon: 'arrow' },
@@ -417,10 +417,10 @@ function answerProducts(query: string, search: ReturnType<typeof productSearch>,
     const list = inCol(brand.h).filter((p) => p.c.split(' ').includes(category.h));
     if (list.length) {
       return {
-        text: [`${We} have ${list.length} ${brand.t} ${category.t.toLowerCase()}.`],
+        text: [`${We} have ${brand.t} ${category.t.toLowerCase()}. Here are some:`],
         products: showcase(list),
         pool: ordered(list),
-        more: { label: `See all ${brand.t} products (${brand.n})`, href: `/collections/${brand.h}/` },
+        more: { label: `See all ${brand.t} products`, href: `/collections/${brand.h}/` },
       };
     }
   }
@@ -430,12 +430,11 @@ function answerProducts(query: string, search: ReturnType<typeof productSearch>,
     const cats = topCounts(list.flatMap((p) => p.c.split(' ').map(catTitle).filter((t): t is string => !!t && t !== 'Construction Tools')), 3);
     return {
       text: [
-        `${We} stock ${brand.t}.`,
-        `There ${brand.n === 1 ? 'is 1 product' : `are ${brand.n} products`} from ${brand.t} on the website${cats.length ? `, including ${listAnd(cats.map((c) => c.toLowerCase()))}` : ''}.`,
+        `${We} stock ${brand.t}${cats.length ? ` — including ${listAnd(cats.map((c) => c.toLowerCase()))}` : ''}.`,
       ],
       products: showcase(list),
       pool: ordered(list),
-      more: { label: `See all ${brand.t} products (${brand.n})`, href: `/collections/${brand.h}/` },
+      more: { label: `See all ${brand.t} products`, href: `/collections/${brand.h}/` },
     };
   }
 
@@ -444,11 +443,11 @@ function answerProducts(query: string, search: ReturnType<typeof productSearch>,
     const brands = topCounts(list.map((p) => p.b), 4);
     return {
       text: [
-        `${We} have ${category.n} ${category.t.toLowerCase()}${brands.length ? ` from brands like ${listAnd(brands)}` : ''}.`,
+        `${We} have ${category.t.toLowerCase()}${brands.length ? ` from brands like ${listAnd(brands)}` : ''}.`,
       ],
       products: showcase(list),
       pool: ordered(list),
-      more: { label: `See all ${category.t} (${category.n})`, href: `/collections/${category.h}/` },
+      more: { label: `See all ${category.t}`, href: `/collections/${category.h}/` },
     };
   }
 
@@ -457,7 +456,7 @@ function answerProducts(query: string, search: ReturnType<typeof productSearch>,
     text: [
       search.total === 1
         ? `${We} have this one:`
-        : `${We} have ${search.total} products matching “${label}”. Here are the closest:`,
+        : `Here’s what ${We.toLowerCase()} have for “${label}”:`,
     ],
     products: search.hits,
     pool: search.all,
@@ -544,10 +543,10 @@ async function answer(query: string, ctx: BrainContext, depth = 0): Promise<Repl
   if (mem?.pool && MORE.test(q) && q.split(' ').length <= 6) {
     const from = mem.shown ?? 0;
     const next = mem.pool.slice(from, from + 6);
-    if (!next.length) return { text: [`That’s all ${mem.pool.length} — you’ve seen every match.`], more: mem.more, actions: [browse] };
+    if (!next.length) return { text: ['That’s everything for this search — you’ve seen every match.'], more: mem.more, actions: [browse] };
     mem.shown = from + next.length;
     const left = mem.pool.length - mem.shown;
-    return { text: [left > 0 ? `Here are ${next.length} more (${left} left):` : `Here are the last ${next.length}:`], products: next, more: mem.more };
+    return { text: [left > 0 ? 'Here are more:' : 'Here are the last few:'], products: next, more: mem.more };
   }
 
   if (ctx.index) {
@@ -563,10 +562,10 @@ async function answer(query: string, ctx: BrainContext, depth = 0): Promise<Repl
           mem.brand = brand.h;
           mem.category = category.h;
           return {
-            text: [`Yes — we have ${list.length} ${brand.t} ${list.length === 1 ? 'product' : 'products'} in ${category.t.toLowerCase()}.`],
+            text: [`Yes — we have ${brand.t} ${category.t.toLowerCase()}. Here are some:`],
             products: list.slice(0, 6),
             pool: list,
-            more: { label: `See all ${brand.t} products (${brand.n})`, href: `/collections/${brand.h}/` },
+            more: { label: `See all ${brand.t} products`, href: `/collections/${brand.h}/` },
           };
         }
       }
@@ -581,7 +580,7 @@ async function answer(query: string, ctx: BrainContext, depth = 0): Promise<Repl
     } else if (HOW_MANY.test(q)) {
       const count = (k: string) => ctx.index!.collections.filter((c) => c.k === k).length;
       return {
-        text: [`We have ${ctx.index.products.length} products on the website, from ${count('brand')} brands across ${count('category')} categories.`],
+        text: [`We stock a wide range of tools and supplies from ${count('brand')}+ brands across ${count('category')} categories — and we add new products all the time.`],
         actions: [browse, { kind: 'ask', label: 'Brands', text: 'What brands do you have?' }, { kind: 'ask', label: 'Categories', text: 'What do you sell?' }],
       };
     }

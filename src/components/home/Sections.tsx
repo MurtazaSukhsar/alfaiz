@@ -1,54 +1,68 @@
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
-import { brandEdit, brandStrip, faqs, features, heroSlides, industries, moreCategories, ranges, reviews, site, waLink } from '@/data/site';
-import { countIn, getCollection, getProduct, products, productsIn } from '@/lib/catalog';
+import { brandEdit, brandLogo, brandStrip, faqs, features, hero, homeCategories, industries, reviews, site, waLink } from '@/data/site';
+import { countIn, getCollection, getProduct, products, productsIn, toCard } from '@/lib/catalog';
 import { imgUrl } from '@/lib/format';
 import { Icon, type IconName } from '../Icons';
 import { BlurText } from '../fx/BlurText';
-import { Ticker } from '../fx/Ticker';
 import { BrandEdit, type EditIssue, type EditItem } from '../BrandEdit';
-import { BrandHero, type HeroBrand } from '../BrandHero';
+import { BrandHero, type HeroTile } from '../BrandHero';
+import { ProductCard } from '../ProductCard';
 import { TestimonialsSection } from '../ui/testimonials-with-marquee';
 
-/* ---------------------------------------------------------------- Brand hero */
+/* ---------------------------------------------------------------- Hero (product grid) */
 
 export function Hero() {
-  const brands: HeroBrand[] = heroSlides.map((h) => ({
-    brand: h.brand,
-    name: h.name,
-    tagline: h.tagline,
-    count: countIn(h.brand),
-    products: h.products.flatMap(({ handle, label }) => {
-      const p = getProduct(handle);
-      return p?.images.length ? [{ href: `/products/${p.handle}/`, label, name: p.name, image: imgUrl(p.images[0].src, 800) }] : [];
-    }),
-  }));
-  return <BrandHero brands={brands} total={products.length} brandTotal={brandStrip.length} />;
+  const tiles: HeroTile[] = hero.tiles.flatMap(({ handle, label }) => {
+    const p = getProduct(handle);
+    return p?.images.length ? [{ href: `/products/${p.handle}/`, brand: p.brand, label: label || p.name, name: p.name, image: imgUrl(p.images[0].src, 600) }] : [];
+  });
+  return <BrandHero tiles={tiles} badge={hero.badge} title1={hero.title1} title2={hero.title2} text={hero.text} />;
+}
+
+/* ---------------------------------------------------------------- Featured products */
+
+export function Featured() {
+  const picked = products.filter((p) => p.featured).sort((a, b) => (a.featuredRank ?? 0) - (b.featuredRank ?? 0));
+  const list = (picked.length ? picked : products.filter((p) => p.images.length)).slice(0, 8);
+  if (!list.length) return null;
+  return (
+    <section aria-labelledby="featured-title" className="pt-12 sm:pt-16">
+      <div className="wrap">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-3 sm:mb-8">
+          <div className="flex flex-col gap-2">
+            <span className="eyebrow text-accent">Hand-picked</span>
+            <BlurText as="h2" id="featured-title" className="text-[clamp(26px,3vw,38px)] font-semibold leading-[1.08] tracking-[-0.025em]" text="Featured products" />
+          </div>
+          <Link href="/collections/all/" className="nudge-host inline-flex h-10 items-center gap-1.5 text-sm font-semibold text-accent">
+            Explore all products
+            <Icon name="arrow" size={15} strokeWidth={2.2} className="nudge" />
+          </Link>
+        </div>
+        <ul className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
+          {list.map((p) => (
+            <li key={p.handle} className="w-[72%] shrink-0 snap-start sm:w-auto">
+              <ProductCard p={toCard(p)} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
 }
 
 /* ---------------------------------------------------------------- The Brand Edit (magazine spread) */
 
 export function Edit() {
   const issues: EditIssue[] = brandEdit.flatMap((e) => {
-    const look = heroSlides.find((h) => h.brand === e.brand);
     const items: EditItem[] = e.products.flatMap(({ handle, label, spec }) => {
       const p = getProduct(handle);
-      return p && p.images.length ? [{ href: `/products/${p.handle}/`, label, spec, name: p.name, image: imgUrl(p.images[0].src, 600) }] : [];
+      return p && p.images.length ? [{ href: `/products/${p.handle}/`, label: label || p.name, spec, name: p.name, image: imgUrl(p.images[0].src, 600) }] : [];
     });
-    if (!look || !items.length) return [];
-    return [
-      {
-        brand: e.brand,
-        name: look.name,
-        note: e.note,
-        count: countIn(e.brand),
-        bg: look.bg,
-        accent: look.accent,
-        onAccent: look.onAccent,
-        items: items.slice(0, 3),
-      },
-    ];
+    if (!e.brand || !items.length) return [];
+    return [{ brand: e.brand, name: e.name || getCollection(e.brand)?.title || e.brand, note: e.note, logo: brandLogo(e.brand), items: items.slice(0, 3) }];
   });
+  if (!issues.length) return null;
   return <BrandEdit issues={issues} />;
 }
 
@@ -57,27 +71,26 @@ export function Edit() {
 /** Extra zoom for category photos with a lot of empty space around the product. */
 const TILE_ZOOM: Record<string, number> = { 'caster-wheels': 1.75, 'adhesives-sealants': 1.3, 'packaging-and-sealing': 1.15 };
 
-const EXTRA_CATEGORIES = ['construction-tools', 'wood-works', 'scaffolding'];
-
 export function Categories() {
-  const tiles = [
-    ...ranges.map((r) => ({ handle: r.handle, title: r.title, image: r.image })),
-    ...[...moreCategories, ...EXTRA_CATEGORIES].flatMap((h) => {
-      const c = getCollection(h);
-      const src = productsIn(h).find((p) => p.images.length)?.images[0].src;
-      return c && src ? [{ handle: h, title: c.title, image: imgUrl(src, 300) }] : [];
-    }),
-  ];
+  // tile photo: the one set in the admin, else the first product photo in that category
+  const tiles = homeCategories.flatMap((t) => {
+    const c = getCollection(t.handle);
+    const src = t.image || (() => {
+      const first = productsIn(t.handle).find((p) => p.images.length)?.images[0].src;
+      return first ? imgUrl(first, 300) : '';
+    })();
+    return c && src ? [{ handle: t.handle, title: t.title || c.title, image: src }] : [];
+  });
   return (
     <section aria-labelledby="cats-title" className="pt-12 sm:pt-16">
       <div className="wrap">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-3 sm:mb-8">
           <div className="flex flex-col gap-2">
             <span className="eyebrow text-accent">Every aisle</span>
-            <BlurText as="h2" id="cats-title" className="text-[clamp(26px,3vw,38px)] font-semibold leading-[1.08] tracking-[-0.025em]" text={`All ${tiles.length} categories`} />
+            <BlurText as="h2" id="cats-title" className="text-[clamp(26px,3vw,38px)] font-semibold leading-[1.08] tracking-[-0.025em]" text="Shop by category" />
           </div>
           <Link href="/collections/all/" className="nudge-host inline-flex h-10 items-center gap-1.5 text-sm font-semibold text-accent">
-            View all {products.length} products
+            Explore all products
             <Icon name="arrow" size={15} strokeWidth={2.2} className="nudge" />
           </Link>
         </div>
@@ -87,7 +100,7 @@ export function Categories() {
             <li key={t.handle} className="reveal">
               <Link
                 href={`/collections/${t.handle}/`}
-                className="spot group flex h-full flex-col items-center gap-2 rounded-[20px] bg-white p-2 pb-3 text-center ring-1 ring-line-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_32px_-20px_rgba(21,23,26,.45)] hover:ring-accent/40 sm:p-3 sm:pb-4"
+                className="spot group flex h-full flex-col items-center gap-2 rounded-[12px] bg-white p-2 pb-3 text-center ring-1 ring-line-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_32px_-20px_rgba(21,23,26,.45)] hover:ring-accent/40 sm:p-3 sm:pb-4"
               >
                 <span className="grid aspect-square w-full place-items-center overflow-hidden rounded-2xl bg-[#F4F4F1] p-1 transition duration-300 group-hover:bg-accent-soft sm:p-1.5">
                   <img
@@ -99,15 +112,12 @@ export function Categories() {
                   />
                 </span>
                 <span className="text-[12.5px] font-semibold leading-tight text-ink sm:text-[14px]">{t.title}</span>
-                <span className="-mt-1 text-[11.5px] text-muted sm:text-[12.5px]">
-                  <Ticker value={countIn(t.handle)} /> products
-                </span>
               </Link>
             </li>
           ))}
         </ul>
 
-        <div className="reveal mt-3 h-[150px] sm:h-[170px]">
+        <div className="reveal mt-3 min-h-[170px]">
           <AllProductsTile />
         </div>
       </div>
@@ -115,46 +125,7 @@ export function Categories() {
   );
 }
 
-/* ---------------------------------------------------------------- Industries (one moving row) */
-
-/** What each industry typically buys, as category handles (the first one is where each card links). */
-const INDUSTRY_CATS: Record<string, string[]> = {
-  Construction: ['construction-tools', 'power-tools', 'fastners', 'scaffolding', 'safety-products'],
-  Manufacturing: ['air-compressors', 'pneumatic-tools', 'abrasives', 'welding', 'safety-products'],
-  'Oil & Gas': ['non-sparking-tools', 'safety-products', 'air-compressors', 'generator'],
-  'Marine & Shipbuilding': ['non-sparking-tools', 'welding', 'fastners', 'pressure-washers', 'abrasives'],
-  'Electrical Contractors': ['power-tools', 'drill-bits', 'construction-tools', 'safety-products', 'fastners'],
-  HVAC: ['drill-bits', 'fastners', 'adhesives-sealants', 'power-tools', 'packaging-and-sealing'],
-  Automotive: ['garage-tools', 'pneumatic-tools', 'air-compressors', 'pressure-washers'],
-  'DIY & Home Improvement': ['power-tools', 'drill-bits', 'wood-works', 'garage-tools', 'adhesives-sealants'],
-};
-
-function IndustryTrack({ hidden = false }: { hidden?: boolean }) {
-  return (
-    <ul aria-hidden={hidden || undefined} className="animate-marquee flex shrink-0 [gap:var(--gap)] group-hover:[animation-play-state:paused]">
-      {industries.map((it) => {
-        const first = getCollection((INDUSTRY_CATS[it.title] ?? [])[0] ?? '');
-        return (
-          <li key={it.title}>
-            <Link
-              href={first ? `/collections/${first.handle}/` : '/collections/all/'}
-              tabIndex={hidden ? -1 : undefined}
-              className="flex h-full w-[300px] items-center gap-4 rounded-2xl border border-line-soft bg-white p-4 transition hover:border-accent/40 sm:w-[340px] sm:p-5"
-            >
-              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-accent-soft text-accent">
-                <Icon name={it.icon as IconName} size={21} />
-              </span>
-              <span className="flex min-w-0 flex-col gap-0.5">
-                <span className="text-[16px] font-semibold leading-tight text-ink">{it.title}</span>
-                <span className="text-[13.5px] leading-snug text-muted">{it.text}</span>
-              </span>
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
+/* ---------------------------------------------------------------- Industries (photo cards → industry pages) */
 
 export function Industries() {
   return (
@@ -163,10 +134,8 @@ export function Industries() {
         <div className="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-4 sm:mb-8">
           <div className="flex max-w-[600px] flex-col gap-2">
             <span className="eyebrow text-accent">Industries we serve</span>
-            <h2 id="ind-title" className="text-[clamp(26px,3vw,38px)] font-semibold leading-[1.08] tracking-[-0.025em]">
-              Supplying every trade since {site.since}
-            </h2>
-            <p className="text-[15px] leading-relaxed text-muted">Hardware, tools and industrial supplies for businesses across the UAE and beyond.</p>
+            <BlurText as="h2" id="ind-title" className="text-[clamp(26px,3vw,38px)] font-semibold leading-[1.08] tracking-[-0.025em]" text={`Supplying every trade since ${site.since}`} />
+            <p className="text-[15px] leading-relaxed text-muted">Choose your industry to see the tools and supplies teams like yours order from us.</p>
           </div>
           <Link href="/pages/bulk-special-product-request/" className="pill pill-dark">
             Bulk &amp; special request
@@ -176,10 +145,30 @@ export function Industries() {
           </Link>
         </div>
 
-        <div className="group flex overflow-hidden py-1 [--duration:60s] [--gap:12px] [gap:var(--gap)] [mask-image:linear-gradient(90deg,transparent,#000_4%,#000_96%,transparent)]">
-          <IndustryTrack />
-          <IndustryTrack hidden />
-        </div>
+        <ul className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+          {industries.map((it) => (
+            <li key={it.slug}>
+              <Link
+                href={`/industries/${it.slug}/`}
+                className="group flex h-full flex-col overflow-hidden rounded-[10px] bg-white ring-1 ring-line-soft transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-20px_rgba(21,23,26,.45)] hover:ring-accent/40 lg:flex-row lg:items-stretch"
+              >
+                <span className="flex flex-1 flex-col justify-between gap-2 p-3.5 sm:p-4 lg:order-first lg:w-[46%] lg:flex-none">
+                  <span className="flex flex-col gap-1">
+                    <span className="text-[14.5px] font-semibold leading-tight text-ink sm:text-[15.5px]">{it.title}</span>
+                    <span className="hidden text-[12.5px] leading-snug text-muted sm:block">{it.text}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-accent">
+                    View products
+                    <Icon name="arrow" size={12} strokeWidth={2.4} className="transition group-hover:translate-x-0.5" />
+                  </span>
+                </span>
+                <span className="relative order-first aspect-[4/3] overflow-hidden bg-chip lg:order-none lg:aspect-auto lg:min-h-[150px] lg:flex-1">
+                  <img src={it.image} alt="" loading="lazy" className="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-105" />
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
@@ -203,16 +192,15 @@ function AllProductsTile() {
   return (
     <Link
       href="/collections/all/"
-      className="group relative isolate flex h-full items-center justify-between gap-4 overflow-hidden rounded-[22px] bg-ink p-5 text-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_40px_-20px_rgba(21,23,26,.6)] sm:p-6"
+      className="group relative isolate flex h-full items-center justify-between gap-4 overflow-hidden rounded-[12px] bg-ink p-5 text-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_40px_-20px_rgba(21,23,26,.6)] sm:p-6"
     >
-      <span aria-hidden="true" className="absolute -bottom-24 -left-16 -z-10 size-64 rounded-full bg-accent/45 blur-3xl transition duration-500 group-hover:bg-accent/70" />
-      <span aria-hidden="true" className="absolute inset-0 -z-10 opacity-[0.07] [background-image:radial-gradient(#fff_1px,transparent_1.2px)] [background-size:18px_18px]" />
+      <span aria-hidden="true" className="absolute -bottom-24 -left-16 -z-10 size-64 rounded-full bg-accent/20 blur-3xl transition duration-500 group-hover:bg-accent/30" />
 
       <span className="flex min-w-0 flex-col gap-3">
         <span className="flex flex-col gap-1">
           <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-white/55">Can’t see your category?</span>
-          <span className="text-[24px] font-semibold leading-[1.1] tracking-[-0.02em] sm:text-[30px]">
-            Browse all <Ticker value={products.length} duration={1400} className="text-accent-bright" /> products
+          <span className="max-w-[560px] text-[20px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[26px]">
+            Explore a wide range of products across multiple categories
           </span>
           <span className="text-[13px] text-white/60 sm:text-sm">
             {brandStrip.length} brands · filter, search &amp; add to cart
@@ -254,7 +242,7 @@ export function BrandMarquee() {
             tabIndex={hidden ? -1 : undefined}
             className="spot group/logo flex h-24 w-[190px] items-center justify-center rounded-2xl border border-line-soft bg-white px-6 shadow-[0_1px_2px_rgba(21,23,26,.04)] transition duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_16px_28px_-14px_rgba(21,23,26,.3)] sm:h-28 sm:w-[230px]"
           >
-            <img src={`/brands/${b.handle}.png`} alt={hidden ? '' : b.name} loading="lazy" className="max-h-12 w-auto max-w-full object-contain transition duration-300 group-hover/logo:scale-105 sm:max-h-[56px]" />
+            <img src={brandLogo(b.handle)} alt={hidden ? '' : b.name} loading="lazy" className="max-h-12 w-auto max-w-full object-contain transition duration-300 group-hover/logo:scale-105 sm:max-h-[56px]" />
           </Link>
         </li>
       ))}

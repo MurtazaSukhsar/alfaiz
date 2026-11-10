@@ -5,3 +5,5 @@ out/
 .DS_Store
 npm-debug.log*
 .env*.local
+# photos copied from Supabase Storage at build time (scripts/supabase-pull.mjs)
+public/media/

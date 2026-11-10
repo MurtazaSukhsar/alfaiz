@@ -43,7 +43,7 @@ export function SearchResults() {
                 ? 'Search is unavailable right now. Please try again.'
                 : !res
                   ? 'Searching…'
-                  : `${res.total} product${res.total === 1 ? '' : 's'} found`}
+                  : res.total ? `Results for “${q}”` : `No products found for “${q}”`}
           </p>
           {res && res.collections.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">

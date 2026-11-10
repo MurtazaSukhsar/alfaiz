@@ -20,9 +20,9 @@ export default function PrivacyPage() {
         <h1 className="mt-2 text-[clamp(32px,4.4vw,52px)] font-semibold leading-[1.04] tracking-[-0.035em]">Privacy Policy</h1>
         <p className="mt-3 text-sm text-muted">Last updated: {UPDATED}</p>
 
-        <div className="prose-af mt-8 rounded-[28px] bg-white p-6 ring-1 ring-line-soft sm:p-10">
+        <div className="prose-af mt-8 rounded-[14px] bg-white p-6 ring-1 ring-line-soft sm:p-10">
           <p>
-            This website is operated by <strong>{site.legal}</strong> (“Al Faiz”, “we”, “us”), {site.street}, {site.city}, {site.country}. This policy
+            This website is operated by <strong>{site.legal}</strong> (“Al Faiz”, “we”, “us”), {site.country} — our full address is on the Contact page. This policy
             explains what information is involved when you use the website and how we use it.
           </p>
 

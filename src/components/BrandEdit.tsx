@@ -10,10 +10,7 @@ export type EditIssue = {
   brand: string;
   name: string;
   note: string;
-  count: number;
-  bg: string;
-  accent: string;
-  onAccent: string;
+  logo: string;
   items: EditItem[];
 };
 
@@ -170,7 +167,7 @@ function Spread({ issue, i, n, active }: { issue: EditIssue; i: number; n: numbe
     <article
       aria-roledescription="slide"
       aria-label={`${i + 1} of ${n}: ${issue.name}`}
-      className={`be-slide relative grid shrink-0 snap-center overflow-hidden rounded-[28px] bg-white shadow-[0_1px_2px_rgba(21,23,26,.05),0_24px_48px_-32px_rgba(21,23,26,.35)] ring-1 ring-line-soft transition duration-500 lg:grid-cols-[0.82fr_1fr] ${
+      className={`be-slide relative grid shrink-0 snap-center overflow-hidden rounded-[14px] bg-white shadow-[0_1px_2px_rgba(21,23,26,.05),0_24px_48px_-32px_rgba(21,23,26,.35)] ring-1 ring-line-soft transition duration-500 lg:grid-cols-[0.82fr_1fr] ${
         active ? 'opacity-100' : 'opacity-50 lg:scale-[0.97]'
       }`}
     >
@@ -184,7 +181,7 @@ function Spread({ issue, i, n, active }: { issue: EditIssue; i: number; n: numbe
         </span>
         <span className="relative flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-2">
           <span>No. {two(i + 1)} · The Brand Edit</span>
-          <span>{issue.count} products</span>
+          <span>Genuine range</span>
         </span>
         <span className="relative flex flex-col items-start gap-5">
           <Link
@@ -193,7 +190,7 @@ function Spread({ issue, i, n, active }: { issue: EditIssue; i: number; n: numbe
             draggable={false}
             className="flex h-20 items-center rounded-2xl bg-white px-6 shadow-[0_1px_2px_rgba(21,23,26,.08)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-14px_rgba(21,23,26,.35)] sm:h-24 sm:px-7"
           >
-            <img src={`/brands/${issue.brand}.png`} alt={`${issue.name} logo`} draggable={false} className="h-12 w-auto max-w-[220px] object-contain sm:h-14" />
+            <img src={issue.logo} alt={`${issue.name} logo`} draggable={false} className="h-12 w-auto max-w-[220px] object-contain sm:h-14" />
           </Link>
           <span className="text-[clamp(40px,5vw,64px)] font-bold leading-[0.95] tracking-[-0.045em] text-ink">{issue.name}</span>
           <span className="max-w-[380px] text-[16px] leading-relaxed text-ink-2">{issue.note}</span>

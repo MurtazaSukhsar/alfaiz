@@ -18,6 +18,11 @@ export type Product = {
   html: string;
   summary: string;
   updatedAt: string;
+  /** shown in the home page "Featured products" section (set in Supabase) */
+  featured?: boolean;
+  featuredRank?: number;
+  /** industry slugs this product is used in (set in Supabase) */
+  industries?: string[];
 };
 
 export type Collection = {

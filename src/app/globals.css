@@ -15,6 +15,10 @@
   --color-accent: #9c0015;
   --color-accent-soft: #f5e6e8;
   --color-accent-bright: #e0233f;
+  /* softer corners across the site (client feedback: less rounded) */
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.625rem;
+  --radius-3xl: 0.75rem;
 }
 
 @utility wrap {
@@ -281,7 +285,7 @@
   .card {
     background: #fff;
     border: 1px solid var(--color-line);
-    border-radius: 16px;
+    border-radius: 10px;
   }
   .lift {
     transition:
@@ -352,20 +356,15 @@
 
   /* Footer: Al Faiz logo colours, black into deep crimson (no grid) */
   .footer-gradient {
-    background-color: #15171a;
-    background-image:
-      radial-gradient(55% 70% at 100% 100%, rgb(196 0 27 / 0.55), transparent 70%),
-      radial-gradient(45% 60% at 0% 0%, rgb(156 0 21 / 0.4), transparent 70%),
-      linear-gradient(135deg, #15171a 0%, #1d0f13 40%, #4a0610 75%, #7a0012 100%);
+    /* dark with a restrained crimson tint (toned down for a more professional look) */
+    background-color: #17181b;
+    background-image: linear-gradient(135deg, #17181b 0%, #1b1517 55%, #2e0d13 100%);
   }
 
   /* Same palette as the footer, at low strength, for light panels */
   .footer-gradient-light {
     background-color: #fff;
-    background-image:
-      radial-gradient(55% 70% at 100% 100%, rgb(196 0 27 / 0.14), transparent 70%),
-      radial-gradient(45% 60% at 0% 0%, rgb(156 0 21 / 0.08), transparent 70%),
-      linear-gradient(135deg, rgb(21 23 26 / 0.04) 0%, rgb(29 15 19 / 0.03) 40%, rgb(74 6 16 / 0.07) 75%, rgb(122 0 18 / 0.12) 100%);
+    background-image: linear-gradient(135deg, #ffffff 0%, #fbfafa 60%, #f7eff0 100%);
   }
 
   /* Product descriptions imported from Shopify */
@@ -474,16 +473,9 @@
     transform: translateX(calc(-100% - 64px));
   }
 }
-/* Home page backdrop: warm paper, faint dot grid and two soft brand glows */
+/* Home page backdrop: plain light background (no dot grid) */
 .home-canvas {
-  background-color: #f5f5f2;
-  background-image:
-    radial-gradient(55% 900px at 0% 0%, rgb(156 0 21 / 0.06), transparent 70%),
-    radial-gradient(rgb(21 23 26 / 0.075) 1px, transparent 1.3px);
-  background-size:
-    100% 1800px,
-    22px 22px;
-  background-repeat: no-repeat, repeat;
+  background-color: #f5f5f3;
 }
 
 /* 21st.dev-style marquee: two identical tracks slide left by their own width plus the gap */

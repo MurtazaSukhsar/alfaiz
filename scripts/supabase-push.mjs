@@ -6,9 +6,9 @@
 // Needs SUPABASE_URL and SUPABASE_SECRET_KEY in .env.local, and the tables from supabase/schema.sql.
 
 import { readFile } from 'node:fs/promises';
-import { hasSupabase, rest } from './lib-env.mjs';
+import { hasSecret, rest } from './lib-env.mjs';
 
-if (!hasSupabase) {
+if (!hasSecret) {
   console.error('Missing SUPABASE_URL / SUPABASE_SECRET_KEY in .env.local');
   process.exit(1);
 }

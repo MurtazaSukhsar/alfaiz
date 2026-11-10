@@ -24,7 +24,7 @@ export function ProductCard({ p, eager = false, flat = false }: { p: Card; eager
       {!p.available && (
         <span className="absolute right-4 top-4 z-10 rounded-full bg-ink px-2.5 py-1 text-[11px] font-semibold text-white sm:right-5 sm:top-5">Sold out</span>
       )}
-      <Link href={href} tabIndex={-1} aria-hidden="true" className={`block aspect-square overflow-hidden bg-[#F3F4F1] p-5 sm:p-7 ${flat ? 'rounded-2xl' : 'rounded-[18px]'}`}>
+      <Link href={href} tabIndex={-1} aria-hidden="true" className={`block aspect-square overflow-hidden bg-[#F3F4F1] p-5 sm:p-7 ${flat ? 'rounded-2xl' : 'rounded-[10px]'}`}>
         {p.image ? (
           <img
             src={imgUrl(p.image, 500)}

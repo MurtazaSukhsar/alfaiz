@@ -37,11 +37,11 @@ export function Footer() {
               <LogoMark className="h-[42px] w-[26px]" />
               <span className="flex flex-col border-l border-[#E2E3DF] pl-3 leading-tight">
                 <span className="text-sm font-bold">Electric &amp; Hardware</span>
-                <span className="text-xs text-muted">Sharjah · UAE</span>
+                <span className="text-xs text-muted">Tools &amp; industrial supplies</span>
               </span>
             </span>
             <p className="text-sm leading-relaxed">
-              Sharjah-based supplier of tools, machinery and industrial supplies to businesses across the UAE and GCC since {site.since}.
+              Supplier of tools, machinery and industrial supplies to businesses across the UAE and GCC since {site.since}.
             </p>
             <a href={site.instagram} target="_blank" rel="noopener" className="inline-flex min-h-11 items-center gap-2 self-start text-sm text-white hover:underline">
               <Icon name="instagram" />
@@ -83,12 +83,10 @@ export function Footer() {
               <Icon name="mail" size={16} className="shrink-0" />
               {site.email2}
             </a>
-            <a href={site.mapsUrl} target="_blank" rel="noopener" className="flex items-start gap-2.5 hover:text-white">
+            <Link href="/pages/contact/" className="flex items-start gap-2.5 hover:text-white">
               <Icon name="pin" size={16} className="mt-0.5 shrink-0" />
-              <span>
-                {site.street}, {site.city}, UAE
-              </span>
-            </a>
+              <span>Showroom &amp; map</span>
+            </Link>
             <span className="flex items-center gap-2.5">
               <Icon name="clock" size={16} className="shrink-0" />
               {site.hours}
