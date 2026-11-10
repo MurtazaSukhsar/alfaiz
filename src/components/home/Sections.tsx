@@ -1,30 +1,29 @@
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
-import { brandEdit, brandStrip, faqs, features, heroSlides, moreCategories, ranges, reviews, site, waLink } from '@/data/site';
-import { countIn, getCollection, getProduct, products } from '@/lib/catalog';
+import { brandEdit, brandStrip, faqs, features, heroSlides, industries, moreCategories, ranges, reviews, site, waLink } from '@/data/site';
+import { countIn, getCollection, getProduct, products, productsIn } from '@/lib/catalog';
 import { imgUrl } from '@/lib/format';
 import { Icon, type IconName } from '../Icons';
+import { SectionHead } from './SectionHead';
+import { Ticker } from '../fx/Ticker';
 import { BrandEdit, type EditIssue, type EditItem } from '../BrandEdit';
-import { HeroSlider, type HeroSlide } from '../HeroSlider';
+import { BrandHero, type HeroBrand } from '../BrandHero';
 import { TestimonialsSection } from '../ui/testimonials-with-marquee';
 
-/* ---------------------------------------------------------------- Brand hero slider */
+/* ---------------------------------------------------------------- Brand hero */
 
 export function Hero() {
-  const slides: HeroSlide[] = heroSlides.map((s) => ({
-    brand: s.brand,
-    name: s.name,
-    tagline: s.tagline,
-    count: countIn(s.brand),
-    bg: s.bg,
-    accent: s.accent,
-    onAccent: s.onAccent,
-    products: s.products.flatMap(({ handle, label }) => {
+  const brands: HeroBrand[] = heroSlides.map((h) => ({
+    brand: h.brand,
+    name: h.name,
+    tagline: h.tagline,
+    count: countIn(h.brand),
+    products: h.products.flatMap(({ handle, label }) => {
       const p = getProduct(handle);
-      return p && p.images.length ? [{ name: p.name, label, image: imgUrl(p.images[0].src, 700) }] : [];
+      return p?.images.length ? [{ href: `/products/${p.handle}/`, label, name: p.name, image: imgUrl(p.images[0].src, 800) }] : [];
     }),
   }));
-  return <HeroSlider slides={slides} />;
+  return <BrandHero brands={brands} total={products.length} brandTotal={brandStrip.length} />;
 }
 
 /* ---------------------------------------------------------------- The Brand Edit (magazine spread) */
@@ -53,98 +52,126 @@ export function Edit() {
   return <BrandEdit issues={issues} />;
 }
 
-/* ---------------------------------------------------------------- Categories (bento) */
+/* ---------------------------------------------------------------- All categories (index grid) */
 
-const CAT_LOOK: Record<string, { note: string; span: string; img: string }> = {
-  'power-tools': { note: 'Drills, saws, breakers & grinders', span: 'col-span-2 row-span-2', img: 'h-[80%] w-[86%]' },
-  'air-compressors': { note: 'Wide range of Italian air compressors', span: 'col-span-2', img: 'h-full w-[52%]' },
-  'non-sparking-tools': { note: 'For oil, gas, marine & hazardous industries', span: '', img: 'h-[62%] w-[88%]' },
-  'pneumatic-tools': { note: 'Air impact wrenches & drills', span: '', img: 'h-[62%] w-[88%]' },
-  'garage-tools': { note: 'Jacks, jump starters & tool sets', span: '', img: 'h-[66%] w-[66%]' },
-  fastners: { note: 'Bolts, nuts, screws & anchors', span: '', img: 'h-[66%] w-[62%]' },
-  'drill-bits': { note: 'SDS, HSS, glass & wood bits', span: '', img: 'h-[78%] w-[44%]' },
-  abrasives: { note: 'Cutting, grinding & diamond discs', span: '', img: 'h-[66%] w-[62%]' },
-  'safety-products': { note: 'Protecting your workforce', span: 'col-span-2', img: 'h-full w-[46%]' },
-};
+const EXTRA_CATEGORIES = ['construction-tools', 'wood-works', 'scaffolding'];
 
 export function Categories() {
-  const lead = getProduct('dewalt-dck355p2t-qw-18v-xr-3pc-kit-2-5-0ah-batteries')?.images[0]?.src;
+  const tiles = [
+    ...ranges.map((r) => ({ handle: r.handle, title: r.title, image: r.image })),
+    ...[...moreCategories, ...EXTRA_CATEGORIES].flatMap((h) => {
+      const c = getCollection(h);
+      const src = productsIn(h).find((p) => p.images.length)?.images[0].src;
+      return c && src ? [{ handle: h, title: c.title, image: imgUrl(src, 300) }] : [];
+    }),
+  ];
   return (
-    <section aria-labelledby="cats-title" className="pt-12 sm:pt-16">
+    <section aria-labelledby="cats-title" className="py-14 sm:py-20">
       <div className="wrap">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-3 sm:mb-8">
-          <div className="flex flex-col gap-2">
-            <span className="eyebrow text-accent">Categories</span>
-            <h2 id="cats-title" className="text-[clamp(26px,3vw,38px)] font-semibold leading-[1.08] tracking-[-0.025em]">
-              Shop by category
-            </h2>
-          </div>
-          <Link href="/collections/all/" className="nudge-host inline-flex h-10 items-center gap-1.5 text-sm font-semibold text-accent">
-            View all {products.length} products
-            <Icon name="arrow" size={15} strokeWidth={2.2} className="nudge" />
-          </Link>
-        </div>
+        <SectionHead
+          num="02"
+          label="Categories"
+          id="cats-title"
+          title={`All ${tiles.length} categories`}
+          aside={
+            <Link href="/collections/all/" className="nudge-host inline-flex h-10 items-center gap-1.5 text-sm font-semibold text-accent">
+              View all {products.length} products
+              <Icon name="arrow" size={15} strokeWidth={2.2} className="nudge" />
+            </Link>
+          }
+        />
 
-        <ul className="grid auto-rows-[172px] grid-cols-2 gap-3 sm:auto-rows-[210px] sm:gap-4 lg:auto-rows-[230px] lg:grid-cols-4">
-          {ranges.map((r) => {
-            const look = CAT_LOOK[r.handle] ?? { note: '', span: '', img: 'h-[55%] w-[65%]' };
-            const big = r.handle === 'power-tools';
-            const src = big && lead ? imgUrl(lead, 1000) : r.image;
-            return (
-              <li key={r.handle} className={`reveal ${look.span}`}>
-                <Link
-                  href={`/collections/${r.handle}/`}
-                  className="group relative isolate flex h-full flex-col overflow-hidden rounded-[22px] bg-white p-4 ring-1 ring-line-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_40px_-22px_rgba(21,23,26,.45)] hover:ring-accent/40 sm:p-5"
-                >
-                  {big && <span aria-hidden="true" className="absolute inset-0 -z-10 bg-[radial-gradient(60%_70%_at_75%_70%,rgb(156_0_21/0.07),transparent_70%)]" />}
-                  <span className="relative z-10 flex max-w-[78%] flex-col gap-1">
-                    <span className={`font-semibold leading-tight tracking-[-0.02em] text-ink ${big ? 'text-[26px] sm:text-[34px]' : 'text-[16px] sm:text-[19px]'}`}>
-                      {r.title}
-                    </span>
-                    <span className={`leading-snug text-ink-2 ${big ? 'text-[15px]' : 'hidden text-[13px] sm:block'}`}>{look.note}</span>
-                    <span className="mt-1.5 w-fit rounded-full bg-accent-soft px-2.5 py-0.5 text-[12px] font-semibold text-accent">
-                      {countIn(r.handle)} products
-                    </span>
-                  </span>
-
-                  <span className={`pointer-events-none absolute bottom-0 right-0 flex items-end justify-end ${look.img} ${big ? 'p-6 sm:p-10' : 'p-3 sm:p-4'}`}>
-                    <img
-                      src={src}
-                      alt=""
-                      loading="lazy"
-                      className="max-h-full max-w-full object-contain mix-blend-multiply transition duration-500 ease-out group-hover:-translate-y-1 group-hover:scale-[1.07]"
-                    />
-                  </span>
-
-                  <span className={`absolute bottom-4 left-4 z-10 grid place-items-center rounded-full bg-ink text-white transition duration-300 group-hover:-rotate-45 group-hover:bg-accent sm:bottom-5 sm:left-5 ${big ? 'size-12' : 'size-9'}`}>
-                    <Icon name="arrow" size={big ? 18 : 15} strokeWidth={2.2} />
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-          <li className="reveal col-span-2">
-            <AllProductsTile />
-          </li>
+        <ul className="grid grid-cols-3 gap-2.5 sm:gap-3 lg:grid-cols-7">
+          {tiles.map((t) => (
+            <li key={t.handle} className="reveal">
+              <Link
+                href={`/collections/${t.handle}/`}
+                className="spot group flex h-full flex-col items-center gap-2 rounded-[20px] bg-white p-2.5 pb-3 text-center ring-1 ring-line-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_32px_-20px_rgba(21,23,26,.45)] hover:ring-accent/40 sm:p-3 sm:pb-4"
+              >
+                <span className="grid aspect-square w-full place-items-center rounded-2xl bg-[#F4F4F1] p-3 transition duration-300 group-hover:bg-accent-soft sm:p-4">
+                  <img src={t.image} alt="" loading="lazy" className="max-h-full max-w-full object-contain mix-blend-multiply transition duration-500 ease-out group-hover:scale-110" />
+                </span>
+                <span className="text-[12.5px] font-semibold leading-tight text-ink sm:text-[14px]">{t.title}</span>
+                <span className="-mt-1 text-[11.5px] text-muted sm:text-[12.5px]">
+                  <Ticker value={countIn(t.handle)} /> products
+                </span>
+              </Link>
+            </li>
+          ))}
         </ul>
 
-        <div className="reveal mt-5 flex flex-wrap items-center gap-2">
-          <span className="mr-1 text-sm font-medium text-muted">More categories:</span>
-          {moreCategories.flatMap((h) => {
-            const c = getCollection(h);
-            return c
-              ? [
-                  <Link
-                    key={h}
-                    href={`/collections/${h}/`}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-3.5 text-[13.5px] font-medium text-ink-2 ring-1 ring-line-soft transition hover:text-accent hover:ring-accent/40"
-                  >
-                    {c.title}
-                    <span className="text-[12px] text-muted">{c.count}</span>
-                  </Link>,
-                ]
-              : [];
-          })}
+        <div className="reveal mt-3 h-[150px] sm:h-[170px]">
+          <AllProductsTile />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------------------------------------------- Industries (one moving row) */
+
+/** What each industry typically buys, as category handles (the first one is where each card links). */
+const INDUSTRY_CATS: Record<string, string[]> = {
+  Construction: ['construction-tools', 'power-tools', 'fastners', 'scaffolding', 'safety-products'],
+  Manufacturing: ['air-compressors', 'pneumatic-tools', 'abrasives', 'welding', 'safety-products'],
+  'Oil & Gas': ['non-sparking-tools', 'safety-products', 'air-compressors', 'generator'],
+  'Marine & Shipbuilding': ['non-sparking-tools', 'welding', 'fastners', 'pressure-washers', 'abrasives'],
+  'Electrical Contractors': ['power-tools', 'drill-bits', 'construction-tools', 'safety-products', 'fastners'],
+  HVAC: ['drill-bits', 'fastners', 'adhesives-sealants', 'power-tools', 'packaging-and-sealing'],
+  Automotive: ['garage-tools', 'pneumatic-tools', 'air-compressors', 'pressure-washers'],
+  'DIY & Home Improvement': ['power-tools', 'drill-bits', 'wood-works', 'garage-tools', 'adhesives-sealants'],
+};
+
+function IndustryTrack({ hidden = false }: { hidden?: boolean }) {
+  return (
+    <ul aria-hidden={hidden || undefined} className="animate-marquee flex shrink-0 [gap:var(--gap)] group-hover:[animation-play-state:paused]">
+      {industries.map((it) => {
+        const first = getCollection((INDUSTRY_CATS[it.title] ?? [])[0] ?? '');
+        return (
+          <li key={it.title}>
+            <Link
+              href={first ? `/collections/${first.handle}/` : '/collections/all/'}
+              tabIndex={hidden ? -1 : undefined}
+              className="flex h-full w-[300px] items-center gap-4 rounded-2xl border border-transparent bg-paper p-4 transition hover:border-accent/40 hover:bg-white sm:w-[340px] sm:p-5"
+            >
+              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-white text-accent">
+                <Icon name={it.icon as IconName} size={21} />
+              </span>
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="text-[16px] font-semibold leading-tight text-ink">{it.title}</span>
+                <span className="text-[13.5px] leading-snug text-muted">{it.text}</span>
+              </span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+export function Industries() {
+  return (
+    <section aria-labelledby="ind-title" className="band-white py-14 sm:py-20">
+      <div className="wrap">
+        <SectionHead
+          num="04"
+          label="Industries we serve"
+          id="ind-title"
+          title={`Supplying every trade since ${site.since}`}
+          intro="Hardware, tools and industrial supplies for businesses across the UAE and beyond."
+          aside={
+            <Link href="/pages/bulk-special-product-request/" className="pill pill-dark">
+              Bulk &amp; special request
+              <span className="pill-dot bg-white/15">
+                <Icon name="arrow" size={14} strokeWidth={2.2} />
+              </span>
+            </Link>
+          }
+        />
+
+        <div className="group flex overflow-hidden py-1 [--duration:60s] [--gap:12px] [gap:var(--gap)] [mask-image:linear-gradient(90deg,transparent,#000_4%,#000_96%,transparent)]">
+          <IndustryTrack />
+          <IndustryTrack hidden />
         </div>
       </div>
     </section>
@@ -178,7 +205,7 @@ function AllProductsTile() {
         <span className="flex flex-col gap-1">
           <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-white/55">Can’t see your category?</span>
           <span className="text-[24px] font-semibold leading-[1.1] tracking-[-0.02em] sm:text-[30px]">
-            Browse all <span className="text-accent-bright">{products.length}</span> products
+            Browse all <Ticker value={products.length} duration={1400} className="text-accent-bright" /> products
           </span>
           <span className="text-[13px] text-white/60 sm:text-sm">
             {brandStrip.length} brands · filter, search &amp; add to cart
@@ -218,7 +245,7 @@ export function BrandMarquee() {
             href={`/collections/${b.handle}/`}
             title={`Shop ${b.name}`}
             tabIndex={hidden ? -1 : undefined}
-            className="group/logo flex h-24 w-[190px] items-center justify-center rounded-2xl border border-line-soft bg-white px-6 shadow-[0_1px_2px_rgba(21,23,26,.04)] transition duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_16px_28px_-14px_rgba(21,23,26,.3)] sm:h-28 sm:w-[230px]"
+            className="spot group/logo flex h-24 w-[190px] items-center justify-center rounded-2xl border border-line-soft bg-white px-6 shadow-[0_1px_2px_rgba(21,23,26,.04)] transition duration-300 hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_16px_28px_-14px_rgba(21,23,26,.3)] sm:h-28 sm:w-[230px]"
           >
             <img src={`/brands/${b.handle}.png`} alt={hidden ? '' : b.name} loading="lazy" className="max-h-12 w-auto max-w-full object-contain transition duration-300 group-hover/logo:scale-105 sm:max-h-[56px]" />
           </Link>
@@ -227,17 +254,15 @@ export function BrandMarquee() {
     </ul>
   );
   return (
-    <section id="brands" aria-labelledby="brands-title" className="pt-12 sm:pt-16">
+    <section id="brands" aria-labelledby="brands-title" className="band-white py-14 sm:py-20">
       <div className="wrap">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-3 sm:mb-8">
-          <div className="flex flex-col gap-2">
-            <span className="eyebrow text-accent">Our brands</span>
-            <h2 id="brands-title" className="text-[clamp(26px,3vw,38px)] font-semibold leading-[1.08] tracking-[-0.025em]">
-              Genuine tools from {brandStrip.length} trusted brands
-            </h2>
-          </div>
-          <p className="max-w-[340px] text-[15px] leading-relaxed text-muted">Tap a brand to see everything we stock from them.</p>
-        </div>
+        <SectionHead
+          num="01"
+          label="Our brands"
+          id="brands-title"
+          title={`Genuine tools from ${brandStrip.length} trusted brands`}
+          aside={<p className="max-w-[260px] text-[15px] leading-relaxed text-muted">Tap a brand to see everything we stock from them.</p>}
+        />
         <div className="group flex overflow-hidden py-2 [--duration:55s] [--gap:16px] [gap:var(--gap)] [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]">
           <Track />
           <Track hidden />
@@ -263,7 +288,7 @@ export function Testimonials() {
 
 export function TrustStrip() {
   return (
-    <section id="about" aria-label="Why buy from Al Faiz" className="py-8 sm:py-10">
+    <section id="about" aria-label="Why buy from Al Faiz" className="pb-14 pt-4 sm:pb-20 sm:pt-5">
       <div className="wrap">
         <ul className="grid gap-px overflow-hidden rounded-2xl border border-line-soft bg-line-soft sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f) => (
@@ -287,14 +312,16 @@ export function TrustStrip() {
 
 export function Faq() {
   return (
-    <section id="faq" className="pb-20 pt-10 sm:pb-24 sm:pt-14">
-      <div className="wrap grid gap-8 lg:grid-cols-12 lg:gap-10">
-        <div className="flex flex-col items-start gap-3 lg:col-span-4">
-          <h2 className="text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">Frequently asked questions</h2>
+    <section id="faq" aria-labelledby="faq-title" className="band-white py-14 sm:py-20">
+      <div className="wrap">
+        <SectionHead num="05" label="Questions" id="faq-title" title="Frequently asked questions" />
+      </div>
+      <div className="wrap grid gap-8 lg:grid-cols-12 lg:gap-8">
+        <div className="flex flex-col items-start gap-3 lg:col-span-3">
           <p className="text-[15px] leading-relaxed text-muted">
             Something else? Call {site.phone} or message us on WhatsApp.
           </p>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-1 flex flex-wrap gap-2">
             <Link href="/pages/faq/" className="pill pill-dark nudge-host">
               All questions
               <span className="pill-dot bg-white/15">
@@ -307,7 +334,7 @@ export function Faq() {
             </a>
           </div>
         </div>
-        <div className="border-t border-line lg:col-span-8">
+        <div className="border-t border-line lg:col-span-9">
           {faqs.map((f, i) => (
             <details key={f.q} open={i === 0} className="group border-b border-line">
               <summary className="flex min-h-16 cursor-pointer items-center justify-between gap-6 py-3.5 text-[16px] font-medium text-ink">

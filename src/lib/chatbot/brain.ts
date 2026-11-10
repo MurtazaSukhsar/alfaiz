@@ -5,6 +5,7 @@
 import { brandStrip, ranges, site, waLink } from '@/data/site';
 import type { SearchIndex } from '@/lib/types';
 import type { Engine, Intent } from './engine';
+import { spellerFor } from './spell';
 
 export type Hit = SearchIndex['products'][number];
 
@@ -20,12 +21,18 @@ export type Reply = {
   more?: { label: string; href: string };
   actions?: Action[];
   showCart?: boolean;
+  /** every product behind this answer (kept for “show more”, never rendered) */
+  pool?: Hit[];
 };
+
+/** What the conversation was last about, so follow-ups like “show more” or “what about Bosch?” work. */
+export type Memory = { pool?: Hit[]; shown?: number; more?: Reply['more']; brand?: string; category?: string };
 
 export type BrainContext = {
   engine: Engine | null;
   index: SearchIndex | null;
   cartCount: number;
+  memory?: Memory;
 };
 
 /* ------------------------------------------------------------------ shared bits */
@@ -324,20 +331,24 @@ function toolFinder(intent: Extract<Intent, { k: 'use' }>, index: SearchIndex | 
 /* ------------------------------------------------------------------ product search */
 
 const STOP = new Set(
-  'a an the i im i\'m me my we you your do does did have has had any some is are am was be can could would will please pls need needs want wants looking look for find show give get got sell sells selling buy buying available availability stock in of on to and or with this that it its there here what which who how where when about tell know whats need hi hello hey sir madam bro mam thanks thank help helps with take go open there them these those something some use using item items product products thing things plz kindly also other another like good best new right one ones all every more there'.split(
+  'a an the i im i\'m me my we you your do does did have has had any some is are am was be can could would will please pls need needs want wants looking look for find show give get got sell sells selling buy buying available availability stock in of on to and or with this that it its there here what which who how where when about tell know whats need hi hello hey sir madam bro mam thanks thank help helps with take go open there them these those something some use using item items product products thing things plz kindly also other another like good best new right one ones all every more there u ur r ya yall pls plz dont don t s carry carries anything'.split(
     ' ',
   ),
 );
 const QTY = new Set(['pc', 'pcs', 'piece', 'pieces', 'nos', 'no', 'qty', 'quantity', 'unit', 'units', 'x']);
+// words that don't narrow a search on their own ("stanley tools" = "stanley")
+const GENERIC = new Set(['tool', 'equipment', 'stuff', 'supply', 'supplie', 'range', 'collection', 'brand', 'category', 'categorie', 'option', 'model', 'type', 'kind']);
 const singular = (t: string) => (t.length > 4 && t.endsWith('es') && /(ches|shes|xes|sses)$/.test(t) ? t.slice(0, -2) : t.length > 3 && t.endsWith('s') && !t.endsWith('ss') ? t.slice(0, -1) : t);
 
-export function productSearch(index: SearchIndex, query: string): { hits: Hit[]; total: number; exact: number; terms: string[] } {
+export function productSearch(index: SearchIndex, query: string): { hits: Hit[]; total: number; exact: number; terms: string[]; all: Hit[] } {
   const terms = norm(query)
     .replace(/[^a-z0-9 ]+/g, ' ')
     .split(' ')
     .filter((t) => t && !STOP.has(t) && !QTY.has(t) && !/^\d+$/.test(t))
     .map(singular);
-  if (!terms.length) return { hits: [], total: 0, exact: 0, terms };
+  const specific = terms.filter((t) => !GENERIC.has(t));
+  if (specific.length) terms.splice(0, terms.length, ...specific);
+  if (!terms.length) return { hits: [], total: 0, exact: 0, terms, all: [] };
   const scored: { p: Hit; s: number; all: boolean }[] = [];
   for (const p of index.products) {
     const h = hay(p);
@@ -357,10 +368,114 @@ export function productSearch(index: SearchIndex, query: string): { hits: Hit[];
   const exact = scored.filter((x) => x.all).length;
   // when some products match every word, only show those (partial matches are noise)
   const pool = exact ? scored.filter((x) => x.all) : scored;
-  return { hits: pool.slice(0, 6).map((x) => x.p), total: pool.length, exact, terms };
+  return { hits: pool.slice(0, 6).map((x) => x.p), total: pool.length, exact, terms, all: pool.map((x) => x.p) };
 }
 
 const PRICE = /\b(price|prices|pricing|priced|cost|costs|costing|how much|rate|rates|aed|dhs|dirhams?|discount|discounts|offer|offers|deal|deals|cheap|cheaper|cheapest|expensive|quotation|budget|sale)\b/i;
+
+/* ------------------------------------------------------------------ direct answers about products */
+
+const QUESTION = /(\?\s*$)|\b(do|does|have|has|got|sell|stock|carry|available|is there|are there|any)\b/i;
+const listAnd = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`);
+const wordsOf = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+/** Brand or category named in the message ("stanley tools", "air compressors"). */
+function namedCollection(index: SearchIndex, query: string) {
+  const qw = ` ${wordsOf(query).split(' ').map(singular).join(' ')} `;
+  const has = (phrase: string) => phrase.length > 2 && qw.includes(` ${phrase.split(' ').map(singular).join(' ')} `);
+  const brand = index.collections.find((c) => c.k === 'brand' && (has(wordsOf(c.t)) || has(wordsOf(c.h.replace(/-/g, ' ')))));
+  const category = index.collections
+    .filter((c) => c.k === 'category' && has(wordsOf(c.t)))
+    .sort((a, b) => wordsOf(b.t).length - wordsOf(a.t).length)[0];
+  return { brand, category };
+}
+
+function topCounts(values: string[], n: number) {
+  const m = new Map<string, number>();
+  values.forEach((v) => v && m.set(v, (m.get(v) ?? 0) + 1));
+  return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, n).map(([v]) => v);
+}
+
+function answerProducts(query: string, search: ReturnType<typeof productSearch>, index: SearchIndex | null, more: Reply['more']): Reply {
+  const asked = QUESTION.test(query);
+  const We = asked ? 'Yes — we' : 'We';
+  if (!index) return { text: ['Here’s what I found:'], products: search.hits, pool: search.all, more };
+  const { brand, category } = namedCollection(index, query);
+  const inCol = (h: string) => index.products.filter((p) => p.c.split(' ').includes(h));
+  const ordered = (list: Hit[]) => {
+    const seen = new Set<string>();
+    return [...list.filter((p) => p.i), ...list.filter((p) => !p.i)].filter((p) => !seen.has(p.n) && seen.add(p.n));
+  };
+  const showcase = (list: Hit[]) => ordered(list).slice(0, 6);
+  const catTitle = (h: string) => index.collections.find((c) => c.h === h && c.k === 'category')?.t;
+
+  // remaining words once the brand / category name is taken out
+  const named = `${brand ? wordsOf(brand.t) + ' ' + wordsOf(brand.h.replace(/-/g, ' ')) : ''} ${category ? wordsOf(category.t) : ''}`.split(' ').map(singular);
+  const rest = search.terms.filter((t) => !named.includes(t));
+
+  if (brand && category && !rest.length) {
+    const list = inCol(brand.h).filter((p) => p.c.split(' ').includes(category.h));
+    if (list.length) {
+      return {
+        text: [`${We} have ${list.length} ${brand.t} ${category.t.toLowerCase()}.`],
+        products: showcase(list),
+        pool: ordered(list),
+        more: { label: `See all ${brand.t} products (${brand.n})`, href: `/collections/${brand.h}/` },
+      };
+    }
+  }
+
+  if (brand && !rest.length) {
+    const list = inCol(brand.h);
+    const cats = topCounts(list.flatMap((p) => p.c.split(' ').map(catTitle).filter((t): t is string => !!t && t !== 'Construction Tools')), 3);
+    return {
+      text: [
+        `${We} stock ${brand.t}.`,
+        `There ${brand.n === 1 ? 'is 1 product' : `are ${brand.n} products`} from ${brand.t} on the website${cats.length ? `, including ${listAnd(cats.map((c) => c.toLowerCase()))}` : ''}.`,
+      ],
+      products: showcase(list),
+      pool: ordered(list),
+      more: { label: `See all ${brand.t} products (${brand.n})`, href: `/collections/${brand.h}/` },
+    };
+  }
+
+  if (category && !rest.length && !brand) {
+    const list = inCol(category.h);
+    const brands = topCounts(list.map((p) => p.b), 4);
+    return {
+      text: [
+        `${We} have ${category.n} ${category.t.toLowerCase()}${brands.length ? ` from brands like ${listAnd(brands)}` : ''}.`,
+      ],
+      products: showcase(list),
+      pool: ordered(list),
+      more: { label: `See all ${category.t} (${category.n})`, href: `/collections/${category.h}/` },
+    };
+  }
+
+  const label = search.terms.join(' ');
+  return {
+    text: [
+      search.total === 1
+        ? `${We} have this one:`
+        : `${We} have ${search.total} products matching “${label}”. Here are the closest:`,
+    ],
+    products: search.hits,
+    pool: search.all,
+    more,
+  };
+}
+
+/** "Do you have X?" with nothing on the website. */
+function notFound(query: string, terms: string[]): Reply {
+  const label = terms.join(' ') || query;
+  return {
+    text: [`Sorry, we don’t have “${label}” on the website right now.`, 'Our team may be able to source it for you — send the name or model number.'],
+    actions: [
+      wa('Ask if we can source it', `Hello Al Faiz, can you supply: ${label}?`),
+      { kind: 'link', label: 'Bulk & special request', href: '/pages/bulk-special-product-request/', icon: 'arrow' },
+    ],
+  };
+}
 
 /* ------------------------------------------------------------------ keyword fallback (while the model loads) */
 
@@ -399,11 +514,80 @@ const sayReply = (key: string, ctx: BrainContext): Reply | null => {
   return r ? (typeof r === 'function' ? r(ctx) : r) : null;
 };
 
-export async function respond(query: string, ctx: BrainContext): Promise<Reply> {
-  const q = query.trim().slice(0, 300);
-  if (!q) return FALLBACK;
+const MORE = /^(ok\s+)?((can you |please )?(show|see|give|send|list)\s+)?(me\s+)?(some\s+|any\s+|the\s+)?(more|others?|other ones|next|rest|remaining)\b/i;
+const ACK = /^(ok|okay|k|fine|alright|all right|cool|great|nice|good|got it|understood|noted|sure|yes|yeah|yep|no|nope|nothing|no thanks|hmm+|perfect|done)[.! ]*$/i;
+const CUE = /^(and|what about|how about|any|only|in|from|by|same in|also|or)\b/i;
+const HOW_MANY = /\bhow many\b.*\b(products?|items?|tools?|brands?|categor)/i;
 
-  const search = ctx.index ? productSearch(ctx.index, q) : { hits: [] as Hit[], total: 0, exact: 0, terms: [] as string[] };
+/** Main entry: reads the message, remembers what it was about, returns the answer. */
+export async function respond(query: string, ctx: BrainContext): Promise<Reply> {
+  const { pool, ...reply } = await answer(query, ctx);
+  const mem = ctx.memory;
+  if (mem && pool && reply.products?.length) {
+    mem.pool = pool;
+    mem.shown = reply.products.length;
+    mem.more = reply.more;
+  }
+  return reply;
+}
+
+async function answer(query: string, ctx: BrainContext, depth = 0): Promise<Reply> {
+  const raw = query.trim().slice(0, 300);
+  if (!raw) return FALLBACK;
+  // read through shorthand and spelling slips ("do u hve makitta grindr")
+  const q = spellerFor(ctx.index).fix(raw) || raw.toLowerCase();
+  const mem = ctx.memory;
+
+  if (ACK.test(q)) return { text: ['Great. Anything else I can help you find?'], actions: starters.slice(0, 3) };
+
+  // "show more" continues the last list
+  if (mem?.pool && MORE.test(q) && q.split(' ').length <= 6) {
+    const from = mem.shown ?? 0;
+    const next = mem.pool.slice(from, from + 6);
+    if (!next.length) return { text: [`That’s all ${mem.pool.length} — you’ve seen every match.`], more: mem.more, actions: [browse] };
+    mem.shown = from + next.length;
+    const left = mem.pool.length - mem.shown;
+    return { text: [left > 0 ? `Here are ${next.length} more (${left} left):` : `Here are the last ${next.length}:`], products: next, more: mem.more };
+  }
+
+  if (ctx.index) {
+    const named = namedCollection(ctx.index, q);
+    // "what about Bosch?" after looking at grinders, or "any drill bits?" after a brand
+    if (mem && depth === 0 && CUE.test(q) && q.split(' ').length <= 6) {
+      const col = (h?: string) => ctx.index!.collections.find((c) => c.h === h);
+      const brand = named.brand ?? (named.category ? col(mem.brand) : undefined);
+      const category = named.category ?? (named.brand ? col(mem.category) : undefined);
+      if (brand && category && !(named.brand && named.category)) {
+        const list = ctx.index.products.filter((p) => { const cs = p.c.split(' '); return cs.includes(brand.h) && cs.includes(category.h); });
+        if (list.length) {
+          mem.brand = brand.h;
+          mem.category = category.h;
+          return {
+            text: [`Yes — we have ${list.length} ${brand.t} ${list.length === 1 ? 'product' : 'products'} in ${category.t.toLowerCase()}.`],
+            products: list.slice(0, 6),
+            pool: list,
+            more: { label: `See all ${brand.t} products (${brand.n})`, href: `/collections/${brand.h}/` },
+          };
+        }
+      }
+    }
+    if (named.brand || named.category) {
+      if (mem) {
+        if (named.brand) mem.brand = named.brand.h;
+        if (named.category) mem.category = named.category.h;
+        if (named.brand && !named.category && !CUE.test(q)) mem.category = undefined;
+        if (named.category && !named.brand && !CUE.test(q)) mem.brand = undefined;
+      }
+    } else if (HOW_MANY.test(q)) {
+      const count = (k: string) => ctx.index!.collections.filter((c) => c.k === k).length;
+      return {
+        text: [`We have ${ctx.index.products.length} products on the website, from ${count('brand')} brands across ${count('category')} categories.`],
+        actions: [browse, { kind: 'ask', label: 'Brands', text: 'What brands do you have?' }, { kind: 'ask', label: 'Categories', text: 'What do you sell?' }],
+      };
+    }
+  }
+
+  const search = ctx.index ? productSearch(ctx.index, q) : { hits: [] as Hit[], total: 0, exact: 0, terms: [] as string[], all: [] as Hit[] };
   // if the words name a category or brand, link to that page instead of a search
   const colMatch = ctx.index && search.terms.length
     ? ctx.index.collections.find((c) => {
@@ -416,15 +600,30 @@ export async function respond(query: string, ctx: BrainContext): Promise<Reply> 
     : search.total > search.hits.length
       ? { label: `See all ${search.total} results`, href: `/search/?q=${encodeURIComponent(search.terms.join(' '))}` }
       : undefined;
-  const productReply = (): Reply => ({
-    text: [search.total === 1 ? 'I found this:' : `I found ${search.total} matching products:`],
-    products: search.hits,
-    more: moreLink,
-  });
+  const productReply = (): Reply => answerProducts(q, search, ctx.index, moreLink);
   const withProducts = (r: Reply): Reply =>
     search.hits.length
       ? { ...r, products: search.hits, more: moreLink ?? r.more }
       : r;
+
+  // Quotes and bulk requests: explain the way to ask, never a figure.
+  if (/\b(bulk|wholesale|boq|tender|large (order|quantity|quantities)|big (order|quantity)|special (order|request|product))\b/i.test(q)) {
+    return withProducts({
+      text: ['For bulk orders, a BOQ or a product that isn’t on the website, send us your list — our sales team replies with a quote.'],
+      actions: [{ kind: 'link', label: 'Bulk & special request', href: '/pages/bulk-special-product-request/', icon: 'arrow' }, wa('Send list on WhatsApp', 'Hello Al Faiz, I would like a quote for a bulk order:'), mail],
+    });
+  }
+  if (/\b(quote|quotes|quotation|quotations|rfq|enquiry|inquiry|estimate)\b/i.test(q)) {
+    return withProducts({
+      text: ['Getting a quote is quick:'],
+      list: [
+        { label: '1. Send your list on WhatsApp or email — items, models and quantities.' },
+        { label: '2. Or add products to your cart and press “Checkout on WhatsApp”.' },
+        { label: '3. Our sales team replies with price, stock and delivery.' },
+      ],
+      actions: [wa('Get a quote on WhatsApp', 'Hello Al Faiz, I would like a quote for:'), cart, mail],
+    });
+  }
 
   // Prices are never discussed — always hand over to the sales team.
   if (PRICE.test(q)) return withProducts(NO_PRICE);
@@ -432,6 +631,11 @@ export async function respond(query: string, ctx: BrainContext): Promise<Reply> 
   let top: { intent: Intent; score: number } | null = null;
   if (ctx.engine) {
     try {
+      // a message that is clearly about something else stays off-topic, whatever its spelling
+      if (q !== raw.toLowerCase()) {
+        const first = await ctx.engine.classify(raw);
+        if (first.length && ctx.engine.intents[first[0].intent].k === 'off' && first[0].score >= 0.6 && !(ctx.index && productSearch(ctx.index, raw).hits.length)) return OFF_TOPIC;
+      }
       const ranked = await ctx.engine.classify(q);
       if (ranked.length) top = { intent: ctx.engine.intents[ranked[0].intent], score: ranked[0].score };
     } catch {
@@ -475,6 +679,7 @@ export async function respond(query: string, ctx: BrainContext): Promise<Reply> 
   if (search.hits.length) return productReply();
 
   if (top?.intent.k === 'off') return OFF_TOPIC;
+  if (QUESTION.test(q) && search.terms.length) return notFound(q, search.terms);
   return FALLBACK;
 }
 

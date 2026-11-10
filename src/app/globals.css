@@ -474,6 +474,19 @@
     transform: translateX(calc(-100% - 64px));
   }
 }
+/* Home page bands: sections alternate white / paper / light crimson tint */
+.band-white {
+  background: #fff;
+  border-block: 1px solid var(--color-line-soft);
+}
+.band-tint {
+  background-color: #fbf7f7;
+  background-image:
+    radial-gradient(50% 80% at 100% 100%, rgb(196 0 27 / 0.08), transparent 70%),
+    radial-gradient(40% 70% at 0% 0%, rgb(156 0 21 / 0.05), transparent 70%);
+  border-block: 1px solid rgb(156 0 21 / 0.08);
+}
+
 /* Home page backdrop: warm paper, faint dot grid and two soft brand glows */
 .home-canvas {
   background-color: #f5f5f2;
@@ -661,6 +674,20 @@
 }
 
 /* ---------- The Brand Edit (magazine spread) ---------- */
+.be-track {
+  --slide: calc(100vw - 56px);
+  padding-inline: calc((100% - var(--slide)) / 2);
+  scroll-padding-inline: calc((100% - var(--slide)) / 2);
+  user-select: none;
+}
+.be-slide {
+  width: var(--slide);
+}
+@media (min-width: 640px) {
+  .be-track {
+    --slide: min(1192px, calc(100vw - 2 * clamp(16px, 4vw, 24px)));
+  }
+}
 .be-in {
   animation: be-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0s) both;
 }
@@ -694,6 +721,35 @@
 @keyframes be-timer {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
+}
+
+/* ---------- Brand hero (rotating brand + products) ---------- */
+.bh-word {
+  animation: bh-word 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes bh-word {
+  from { transform: translateY(105%); }
+  to { transform: none; }
+}
+.bh-prod {
+  animation: bh-prod 0.75s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0s) both;
+}
+@keyframes bh-prod {
+  from { opacity: 0; transform: translateY(26px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+.bh-float {
+  animation: bh-float 5s ease-in-out infinite;
+}
+@keyframes bh-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.bh-mark {
+  animation: hs-mark 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bh-word, .bh-prod, .bh-float, .bh-mark { animation: none; }
 }
 
 /* ---------- Brand hero slider ---------- */
@@ -735,6 +791,169 @@
   to { opacity: 0.16; transform: none; }
 }
 @keyframes hs-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* =====================================================================
+   Effects (patterns inspired by 21st.dev, written for this site)
+   ===================================================================== */
+
+/* Limelight: sliding pill + a small crimson light that follows the active item */
+.lime-pill {
+  z-index: 0;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(21 23 26 / 0.08), 0 0 0 1px rgb(21 23 26 / 0.04);
+}
+.lime-pill.lime-dark {
+  background: var(--color-ink);
+  box-shadow: 0 6px 16px -8px rgb(21 23 26 / 0.6);
+}
+.lime-ready {
+  transition:
+    transform 0.45s cubic-bezier(0.3, 1.25, 0.4, 1),
+    width 0.45s cubic-bezier(0.3, 1.25, 0.4, 1),
+    opacity 0.2s ease;
+}
+.lime-beam {
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  width: 22px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--color-accent);
+  transform: translateX(-50%);
+  box-shadow: 0 0 12px 2px rgb(156 0 21 / 0.45);
+}
+.lime-beam::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  width: 46px;
+  height: 22px;
+  transform: translateX(-50%);
+  background: linear-gradient(rgb(156 0 21 / 0.18), transparent);
+  clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%);
+}
+[data-lime] {
+  position: relative;
+  z-index: 1;
+}
+
+/* Spotlight cards: soft crimson glow + rim that follows the cursor */
+.spot {
+  position: relative;
+  isolation: isolate;
+  --mx: 50%;
+  --my: 50%;
+}
+.spot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(260px circle at var(--mx) var(--my), rgb(156 0 21 / 0.08), transparent 65%);
+}
+.spot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: 1.5px;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(180px circle at var(--mx) var(--my), rgb(156 0 21 / 0.55), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+@media (hover: hover) {
+  .spot:hover::after,
+  .spot:hover::before {
+    opacity: 1;
+  }
+}
+
+/* Border-beam search: a light travels round the search field */
+@property --beam-a {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.beam {
+  position: relative;
+}
+.beam::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  background: conic-gradient(from var(--beam-a), transparent 0deg 250deg, rgb(156 0 21 / 0.15) 290deg, rgb(224 35 63 / 0.95) 340deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: beam-spin 4.5s linear infinite;
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+}
+.beam:hover::before,
+.beam:focus-within::before {
+  opacity: 1;
+  animation-duration: 2.4s;
+}
+@keyframes beam-spin {
+  to {
+    --beam-a: 360deg;
+  }
+}
+
+/* Blur reveal headings (hidden state only when JS has flagged <html class="has-js">) */
+.blur-word {
+  display: inline-block;
+}
+.has-js .blur-text:not(.is-in) .blur-word {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(0.25em);
+}
+.has-js .blur-text.is-in .blur-word {
+  animation: blur-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 0.06s);
+}
+@keyframes blur-in {
+  from { opacity: 0; filter: blur(10px); transform: translateY(0.25em); }
+  to { opacity: 1; filter: blur(0); transform: none; }
+}
+
+/* Scroll progress bar at the bottom edge of the sticky header */
+.scroll-progress {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    transform-origin: left;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-bright));
+    animation: scroll-grow linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes scroll-grow {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
 }
@@ -897,6 +1116,14 @@ html:not(.no-splash) {
 @media (prefers-reduced-motion: reduce) {
   .splash {
     display: none;
+  }
+  .has-js .blur-text .blur-word {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+  .beam::before {
+    opacity: 0.4;
   }
   html {
     scroll-behavior: auto;

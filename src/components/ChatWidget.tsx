@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { site, waLink } from '@/data/site';
-import { GREETING, respond, type Action, type Reply } from '@/lib/chatbot/brain';
+import { GREETING, respond, type Action, type Memory, type Reply } from '@/lib/chatbot/brain';
 import { loadEngine, type Engine } from '@/lib/chatbot/engine';
 import { loadIndex } from '@/lib/search';
 import type { SearchIndex } from '@/lib/types';
@@ -27,6 +27,7 @@ export function ChatWidget() {
   const [status, setStatus] = useState<Status>('idle');
   const [nudge, setNudge] = useState(false);
   const engine = useRef<Engine | null>(null);
+  const memory = useRef<Memory>({});
   const index = useRef<SearchIndex | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -121,9 +122,11 @@ export function ChatWidget() {
 
       // Navigation: "take me to the cart", "open DeWALT", or "take me there" / "yes" after a suggestion.
       const last = [...msgs].reverse().find((m) => m.from === 'bot')?.reply;
-      const nav = q.match(/^(?:please\s+|can you\s+|pls\s+)?(?:take me|bring me|go|navigate|open|show me|show)\b(?:\s+(?:to|the|me|my|page|of)\b)*\s*(.*)$/i);
+      const navRaw = q.match(/^(?:please\s+|can you\s+|pls\s+)?(?:take me|bring me|go|navigate|open|show me|show)\b(?:\s+(?:to|the|me|my|page|of)\b)*\s*(.*)$/i);
+      // “show more” continues the last product list instead of navigating
+      const nav = navRaw && memory.current.pool && /^(me\s+)?(some\s+|any\s+)?(more|others?|next|rest)\b/i.test(navRaw[1] ?? '') ? null : navRaw;
       const rest = (nav?.[1] ?? '').replace(/[?.!]/g, '').trim().toLowerCase();
-      const yes = /^(yes|yeah|yep|ok|okay|sure|please do|do it|go ahead)\b/i.test(q);
+      const yes = /^(yes|yeah|yep|sure|please do|do it|go ahead)\b/i.test(q);
       const lastTarget = last?.more ?? last?.actions?.find((a): a is Extract<Action, { kind: 'link' }> => a.kind === 'link' && !a.external && !/^(tel|mailto):/.test(a.href));
       let dest: { label: string; href: string } | null = null;
       if (nav) dest = !rest || /^(there|it|that|them|this|all|more|page|results?|link)$/.test(rest) ? lastTarget ?? null : findPage(rest, index.current);
@@ -171,7 +174,7 @@ export function ChatWidget() {
       const started = Date.now();
       let reply: Reply;
       try {
-        reply = await respond(q, { engine: engine.current, index: index.current, cartCount: count });
+        reply = await respond(q, { engine: engine.current, index: index.current, cartCount: count, memory: memory.current });
       } catch {
         reply = { text: ['Something went wrong on my side. You can always reach our team on WhatsApp.'], actions: [{ kind: 'link', label: 'Chat on WhatsApp', href: waLink(), external: true, icon: 'chat' }] };
       }

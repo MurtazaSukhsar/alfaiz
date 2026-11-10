@@ -9,6 +9,7 @@ import { AnnouncementBar } from './AnnouncementBar';
 import { Icon } from './Icons';
 import { Logo } from './Logo';
 import { useQuote } from './QuoteProvider';
+import { LimelightPill, useLimelight } from './fx/Limelight';
 import { SearchBox } from './SearchBox';
 
 const links = [
@@ -149,6 +150,7 @@ export function Header({ categories, brands, total }: { categories: Facet[]; bra
             </ul>
           </nav>
         )}
+        <span aria-hidden="true" className="scroll-progress" />
       </header>
     </>
   );
@@ -165,19 +167,22 @@ function MainNav({
   brands: Facet[];
   total: number;
 }) {
+  const active = links.findIndex((l) => isCurrent(l.href));
+  const { ref, box, ready, bind } = useLimelight<HTMLUListElement>(active, true);
   return (
     <nav aria-label="Main" className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] lg:overflow-visible">
-      <ul className="inline-flex gap-0.5 rounded-full bg-chip p-1">
+      <ul ref={ref} {...bind} className="relative inline-flex gap-0.5 rounded-full bg-chip p-1">
+        <LimelightPill box={box} ready={ready} beam={active >= 0} />
         {links.map((l) => {
           const current = isCurrent(l.href);
           return (
-            <li key={l.href} className="group relative shrink-0">
+            <li key={l.href} className="group relative shrink-0" data-lime={current ? 'on' : ''}>
               <Link
                 href={l.href}
                 aria-current={current ? 'page' : undefined}
                 className={`inline-flex h-9 items-center gap-1 rounded-full px-3.5 text-[14.5px] transition ${
                   current
-                    ? 'bg-white font-semibold text-ink shadow-[0_1px_2px_rgba(21,23,26,.08),0_0_0_1px_rgba(21,23,26,.04)]'
+                    ? 'font-semibold text-ink'
                     : 'font-medium text-ink-2 hover:text-ink'
                 }`}
               >

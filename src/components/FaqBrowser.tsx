@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { site, waLink, type FaqGroup, type FaqItem } from '@/data/site';
 import { Icon } from './Icons';
+import { LimelightPill, useLimelight } from './fx/Limelight';
 
 const slug = (s: string) =>
   s
@@ -23,6 +24,7 @@ export function FaqBrowser({ groups }: { groups: FaqGroup[] }) {
   const [query, setQuery] = useState('');
   const [current, setCurrent] = useState<string | null>(null);
   const q = query.trim().toLowerCase();
+  const lime = useLimelight<HTMLDivElement>(`${topic}-${!!q}`);
 
   const all: Row[] = useMemo(() => groups.flatMap((g) => g.items.map((it) => ({ ...it, id: slug(it.q), topic: g.title }))), [groups]);
   const rows: Row[] = useMemo(() => {
@@ -54,7 +56,8 @@ export function FaqBrowser({ groups }: { groups: FaqGroup[] }) {
     <div className="overflow-hidden rounded-[28px] bg-white shadow-[0_1px_2px_rgba(21,23,26,.05),0_30px_60px_-40px_rgba(21,23,26,.4)] ring-1 ring-line-soft">
       {/* topic tabs + search */}
       <div className="flex flex-col gap-3 border-b border-line-soft p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
-        <div role="tablist" aria-label="FAQ topics" className="-mx-1 flex gap-1 overflow-x-auto px-1 [scrollbar-width:none]">
+        <div ref={lime.ref} role="tablist" aria-label="FAQ topics" className="relative -mx-1 flex gap-1 overflow-x-auto px-1 [scrollbar-width:none]">
+          <LimelightPill box={lime.box} ready={lime.ready} className="lime-dark !inset-y-0" />
           {groups.map((g) => {
             const on = !q && topic === g.id;
             return (
@@ -63,13 +66,14 @@ export function FaqBrowser({ groups }: { groups: FaqGroup[] }) {
                 type="button"
                 role="tab"
                 aria-selected={on}
+                data-lime={on ? 'on' : ''}
                 onClick={() => {
                   setTopic(g.id);
                   setQuery('');
                   setCurrent(null);
                 }}
-                className={`flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[14px] transition ${
-                  on ? 'bg-ink font-semibold text-white' : 'font-medium text-ink-2 hover:bg-[#F3F3F0] hover:text-ink'
+                className={`flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[14px] transition-colors duration-300 ${
+                  on ? 'font-semibold text-white' : 'font-medium text-ink-2 hover:text-ink'
                 }`}
               >
                 <Icon name={g.icon} size={16} strokeWidth={1.9} className={on ? 'text-white' : 'text-accent'} />

@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { BlurText } from '../fx/BlurText';
 import { TestimonialCard, type TestimonialAuthor } from './testimonial-card';
 
 interface TestimonialsSectionProps {
@@ -30,7 +31,7 @@ export function TestimonialsSection({ title, description, testimonials, classNam
     <section className={cn('px-0 py-12 text-ink sm:py-16', className)}>
       <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-8 text-center sm:gap-12">
         <div className="flex flex-col items-center gap-3 px-4 sm:gap-4">
-          <h2 className="max-w-[720px] text-[28px] font-semibold leading-tight tracking-[-0.02em] sm:text-[40px]">{title}</h2>
+          <BlurText as="h2" className="max-w-[720px] text-[28px] font-semibold leading-tight tracking-[-0.02em] sm:text-[40px]" text={title} />
           <p className="max-w-[600px] text-[16px] font-medium text-muted sm:text-lg">{description}</p>
         </div>
 

@@ -1,4 +1,4 @@
-import { BrandMarquee, Categories, Edit, Faq, Hero, Testimonials, TrustStrip } from '@/components/home/Sections';
+import { BrandMarquee, Categories, Edit, Faq, Hero, Industries, Testimonials, TrustStrip } from '@/components/home/Sections';
 import { JsonLd } from '@/components/Section';
 import { site } from '@/data/site';
 
@@ -30,11 +30,12 @@ export default function Home() {
       <div className="home-canvas">
         <h1 className="sr-only">Al Faiz Electric &amp; Hardware — tools that work as hard as you do. Tools and industrial supplies in Sharjah, UAE</h1>
         <Hero />
+        <TrustStrip />
         <BrandMarquee />
         <Categories />
         <Edit />
+        <Industries />
         <Testimonials />
-        <TrustStrip />
         <Faq />
       </div>
     </>

@@ -8,7 +8,7 @@ export function ProductCard({ p, eager = false, flat = false }: { p: Card; eager
   const href = `/products/${p.handle}/`;
   return (
     <article
-      className={`group relative flex h-full w-full flex-col ${
+      className={`spot group relative flex h-full w-full flex-col ${
         flat ? '' : 'rounded-3xl bg-white p-2 transition duration-300 hover:shadow-[0_18px_40px_rgba(21,23,26,.08)] sm:p-2.5'
       }`}
     >

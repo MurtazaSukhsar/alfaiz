@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import '@fontsource-variable/outfit';
 import './globals.css';
 import { ChatWidget } from '@/components/ChatWidget';
+import { FxRuntime } from '@/components/fx/FxRuntime';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { Loader } from '@/components/Loader';
@@ -37,7 +38,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var d=document.documentElement;if(sessionStorage.getItem('fz-splash'))d.classList.add('no-splash');else{sessionStorage.setItem('fz-splash','1');setTimeout(function(){d.classList.add('no-splash')},4500)}}catch(e){}",
+              "try{var d=document.documentElement;d.classList.add('has-js');if(sessionStorage.getItem('fz-splash'))d.classList.add('no-splash');else{sessionStorage.setItem('fz-splash','1');setTimeout(function(){d.classList.add('no-splash')},4500)}}catch(e){}",
           }}
         />
         <Loader />
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <main id="main">{children}</main>
           <Footer />
           <ChatWidget />
+          <FxRuntime />
         </QuoteProvider>
       </body>
     </html>

@@ -92,7 +92,7 @@ export function SearchBox({
           e.preventDefault();
           submit();
         }}
-        className="flex h-11 items-center gap-2 rounded-full border border-transparent bg-chip pl-4 pr-1.5 transition hover:bg-[#ebece8] focus-within:border-line focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(21,23,26,.06)] lg:h-10"
+        className="beam flex h-11 items-center gap-2 rounded-full border border-transparent bg-chip pl-4 pr-1.5 transition hover:bg-[#ebece8] focus-within:border-line focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(21,23,26,.06)] lg:h-10"
       >
         <Icon name="search" size={17} strokeWidth={2} className="shrink-0 text-muted" />
         <label htmlFor="site-search" className="sr-only">

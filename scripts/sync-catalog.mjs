@@ -5,9 +5,10 @@
 //   npm run sync
 //   STORE_URL=https://www.alfaizhardware.com npm run sync
 //
-// Run it whenever products change in Shopify, then rebuild the site.
+// Imports from the old Shopify store. Products now live in Supabase: after this, run
+// `npm run supabase:push` to upload them (see supabase/README.md).
 
-import { mkdir, writeFile } from 'node:fs/promises';
+import { writeCatalog } from './lib-catalog.mjs';
 import sanitizeHtml from 'sanitize-html';
 
 const STORE = (process.env.STORE_URL || 'https://www.alfaizhardware.com').replace(/\/$/, '');
@@ -159,23 +160,5 @@ const products = rawProducts.map((p) => {
   };
 });
 
-await mkdir('data', { recursive: true });
-await mkdir('public', { recursive: true });
-await writeFile('data/catalog.json', JSON.stringify({ store: STORE, syncedAt: new Date().toISOString(), products, collections }));
-
-const thumb = (src) => (src ? src + (src.includes('?') ? '&' : '?') + 'width=120' : '');
-const index = {
-  products: products.map((p) => ({
-    h: p.handle,
-    n: p.name,
-    b: p.brand,
-    s: p.subtitle,
-    c: p.collections.join(' '),
-    i: thumb(p.images[0]?.src),
-    a: p.available ? 1 : 0,
-    p: p.price,
-  })),
-  collections: collections.map((c) => ({ h: c.handle, t: c.title, k: c.kind, n: c.count })),
-};
-await writeFile('public/search-index.json', JSON.stringify(index));
-console.log(`Done: ${products.length} products, ${collections.length} collections.`);
+await writeCatalog({ store: STORE, products, collections });
+console.log(`Done: ${products.length} products, ${collections.length} collections. Run \`npm run supabase:push\` to upload them to Supabase.`);
