@@ -44,10 +44,13 @@ create table if not exists public.products (
 
 create index if not exists products_collections_idx on public.products using gin (collections);
 create index if not exists products_sort_idx on public.products (sort);
+create index if not exists products_brand_handle_idx on public.products (brand_handle);
 
 -- keep updated_at current on every edit
 create or replace function public.touch_updated_at() returns trigger
-language plpgsql as $$
+language plpgsql
+set search_path = ''
+as $$
 begin
   new.updated_at = now();
   return new;
@@ -71,11 +74,8 @@ drop policy if exists "read published products" on public.products;
 create policy "read published products" on public.products
   for select to anon, authenticated using (published);
 
--- Public bucket for new product photos (upload in Storage → product-images, then paste the public URL into images).
+-- Public bucket for new product photos (upload in Storage → product-images, then use the public URL in images).
+-- Public buckets serve files by URL without any extra policy.
 insert into storage.buckets (id, name, public)
 values ('product-images', 'product-images', true)
 on conflict (id) do nothing;
-
-drop policy if exists "read product images" on storage.objects;
-create policy "read product images" on storage.objects
-  for select to anon, authenticated using (bucket_id = 'product-images');

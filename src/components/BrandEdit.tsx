@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from './Icons';
-import { SectionHead } from './home/SectionHead';
+import { BlurText } from './fx/BlurText';
 
 export type EditItem = { href: string; label: string; spec: string; image: string; name: string };
 export type EditIssue = {
@@ -117,21 +117,19 @@ export function BrandEdit({ issues }: { issues: EditIssue[] }) {
   };
 
   return (
-    <section ref={section} aria-labelledby="edit-title" aria-roledescription="carousel" className="band-tint py-14 sm:py-20">
+    <section ref={section} aria-labelledby="edit-title" aria-roledescription="carousel" className="py-12 sm:py-16">
       <div className="wrap">
-        <SectionHead
-          num="03"
-          label="The Brand Edit"
-          id="edit-title"
-          title="Key tools from each brand"
-          aside={
-            <span className="flex items-center gap-2 text-sm font-medium text-muted">
-              <Icon name="arrow" size={15} strokeWidth={2.2} className="rotate-180" />
-              Swipe to see more brands
-              <Icon name="arrow" size={15} strokeWidth={2.2} />
-            </span>
-          }
-        />
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-3 sm:mb-8">
+          <div className="flex flex-col gap-2">
+            <span className="eyebrow text-accent">The Brand Edit</span>
+            <BlurText as="h2" id="edit-title" className="text-[clamp(26px,3vw,38px)] font-semibold leading-[1.08] tracking-[-0.025em]" text="Key tools from each brand" />
+          </div>
+          <span className="flex items-center gap-2 text-sm font-medium text-muted">
+            <Icon name="arrow" size={15} strokeWidth={2.2} className="rotate-180" />
+            Swipe to see more brands
+            <Icon name="arrow" size={15} strokeWidth={2.2} />
+          </span>
+        </div>
       </div>
 
       <div

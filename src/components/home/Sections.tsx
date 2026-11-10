@@ -4,7 +4,7 @@ import { brandEdit, brandStrip, faqs, features, heroSlides, industries, moreCate
 import { countIn, getCollection, getProduct, products, productsIn } from '@/lib/catalog';
 import { imgUrl } from '@/lib/format';
 import { Icon, type IconName } from '../Icons';
-import { SectionHead } from './SectionHead';
+import { BlurText } from '../fx/BlurText';
 import { Ticker } from '../fx/Ticker';
 import { BrandEdit, type EditIssue, type EditItem } from '../BrandEdit';
 import { BrandHero, type HeroBrand } from '../BrandHero';
@@ -66,20 +66,18 @@ export function Categories() {
     }),
   ];
   return (
-    <section aria-labelledby="cats-title" className="py-14 sm:py-20">
+    <section aria-labelledby="cats-title" className="pt-12 sm:pt-16">
       <div className="wrap">
-        <SectionHead
-          num="02"
-          label="Categories"
-          id="cats-title"
-          title={`All ${tiles.length} categories`}
-          aside={
-            <Link href="/collections/all/" className="nudge-host inline-flex h-10 items-center gap-1.5 text-sm font-semibold text-accent">
-              View all {products.length} products
-              <Icon name="arrow" size={15} strokeWidth={2.2} className="nudge" />
-            </Link>
-          }
-        />
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-3 sm:mb-8">
+          <div className="flex flex-col gap-2">
+            <span className="eyebrow text-accent">Every aisle</span>
+            <BlurText as="h2" id="cats-title" className="text-[clamp(26px,3vw,38px)] font-semibold leading-[1.08] tracking-[-0.025em]" text={`All ${tiles.length} categories`} />
+          </div>
+          <Link href="/collections/all/" className="nudge-host inline-flex h-10 items-center gap-1.5 text-sm font-semibold text-accent">
+            View all {products.length} products
+            <Icon name="arrow" size={15} strokeWidth={2.2} className="nudge" />
+          </Link>
+        </div>
 
         <ul className="grid grid-cols-3 gap-2.5 sm:gap-3 lg:grid-cols-7">
           {tiles.map((t) => (
@@ -132,9 +130,9 @@ function IndustryTrack({ hidden = false }: { hidden?: boolean }) {
             <Link
               href={first ? `/collections/${first.handle}/` : '/collections/all/'}
               tabIndex={hidden ? -1 : undefined}
-              className="flex h-full w-[300px] items-center gap-4 rounded-2xl border border-transparent bg-paper p-4 transition hover:border-accent/40 hover:bg-white sm:w-[340px] sm:p-5"
+              className="flex h-full w-[300px] items-center gap-4 rounded-2xl border border-line-soft bg-white p-4 transition hover:border-accent/40 sm:w-[340px] sm:p-5"
             >
-              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-white text-accent">
+              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-accent-soft text-accent">
                 <Icon name={it.icon as IconName} size={21} />
               </span>
               <span className="flex min-w-0 flex-col gap-0.5">
@@ -151,23 +149,23 @@ function IndustryTrack({ hidden = false }: { hidden?: boolean }) {
 
 export function Industries() {
   return (
-    <section aria-labelledby="ind-title" className="band-white py-14 sm:py-20">
+    <section aria-labelledby="ind-title" className="pb-4 pt-12 sm:pb-6 sm:pt-16">
       <div className="wrap">
-        <SectionHead
-          num="04"
-          label="Industries we serve"
-          id="ind-title"
-          title={`Supplying every trade since ${site.since}`}
-          intro="Hardware, tools and industrial supplies for businesses across the UAE and beyond."
-          aside={
-            <Link href="/pages/bulk-special-product-request/" className="pill pill-dark">
-              Bulk &amp; special request
-              <span className="pill-dot bg-white/15">
-                <Icon name="arrow" size={14} strokeWidth={2.2} />
-              </span>
-            </Link>
-          }
-        />
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-4 sm:mb-8">
+          <div className="flex max-w-[600px] flex-col gap-2">
+            <span className="eyebrow text-accent">Industries we serve</span>
+            <h2 id="ind-title" className="text-[clamp(26px,3vw,38px)] font-semibold leading-[1.08] tracking-[-0.025em]">
+              Supplying every trade since {site.since}
+            </h2>
+            <p className="text-[15px] leading-relaxed text-muted">Hardware, tools and industrial supplies for businesses across the UAE and beyond.</p>
+          </div>
+          <Link href="/pages/bulk-special-product-request/" className="pill pill-dark">
+            Bulk &amp; special request
+            <span className="pill-dot bg-white/15">
+              <Icon name="arrow" size={14} strokeWidth={2.2} />
+            </span>
+          </Link>
+        </div>
 
         <div className="group flex overflow-hidden py-1 [--duration:60s] [--gap:12px] [gap:var(--gap)] [mask-image:linear-gradient(90deg,transparent,#000_4%,#000_96%,transparent)]">
           <IndustryTrack />
@@ -254,15 +252,20 @@ export function BrandMarquee() {
     </ul>
   );
   return (
-    <section id="brands" aria-labelledby="brands-title" className="band-white py-14 sm:py-20">
+    <section id="brands" aria-labelledby="brands-title" className="pt-12 sm:pt-16">
       <div className="wrap">
-        <SectionHead
-          num="01"
-          label="Our brands"
-          id="brands-title"
-          title={`Genuine tools from ${brandStrip.length} trusted brands`}
-          aside={<p className="max-w-[260px] text-[15px] leading-relaxed text-muted">Tap a brand to see everything we stock from them.</p>}
-        />
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-3 sm:mb-8">
+          <div className="flex flex-col gap-2">
+            <span className="eyebrow text-accent">Our brands</span>
+            <BlurText
+              as="h2"
+              id="brands-title"
+              className="text-[clamp(26px,3vw,38px)] font-semibold leading-[1.08] tracking-[-0.025em]"
+              text={`Genuine tools from ${brandStrip.length} trusted brands`}
+            />
+          </div>
+          <p className="max-w-[340px] text-[15px] leading-relaxed text-muted">Tap a brand to see everything we stock from them.</p>
+        </div>
         <div className="group flex overflow-hidden py-2 [--duration:55s] [--gap:16px] [gap:var(--gap)] [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]">
           <Track />
           <Track hidden />
@@ -288,7 +291,7 @@ export function Testimonials() {
 
 export function TrustStrip() {
   return (
-    <section id="about" aria-label="Why buy from Al Faiz" className="pb-14 pt-4 sm:pb-20 sm:pt-5">
+    <section id="about" aria-label="Why buy from Al Faiz" className="pt-4 sm:pt-5">
       <div className="wrap">
         <ul className="grid gap-px overflow-hidden rounded-2xl border border-line-soft bg-line-soft sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f) => (
@@ -312,16 +315,14 @@ export function TrustStrip() {
 
 export function Faq() {
   return (
-    <section id="faq" aria-labelledby="faq-title" className="band-white py-14 sm:py-20">
-      <div className="wrap">
-        <SectionHead num="05" label="Questions" id="faq-title" title="Frequently asked questions" />
-      </div>
-      <div className="wrap grid gap-8 lg:grid-cols-12 lg:gap-8">
-        <div className="flex flex-col items-start gap-3 lg:col-span-3">
+    <section id="faq" className="pb-20 pt-10 sm:pb-24 sm:pt-14">
+      <div className="wrap grid gap-8 lg:grid-cols-12 lg:gap-10">
+        <div className="flex flex-col items-start gap-3 lg:col-span-4">
+          <BlurText as="h2" className="text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]" text="Frequently asked questions" />
           <p className="text-[15px] leading-relaxed text-muted">
             Something else? Call {site.phone} or message us on WhatsApp.
           </p>
-          <div className="mt-1 flex flex-wrap gap-2">
+          <div className="mt-2 flex flex-wrap gap-2">
             <Link href="/pages/faq/" className="pill pill-dark nudge-host">
               All questions
               <span className="pill-dot bg-white/15">
@@ -334,7 +335,7 @@ export function Faq() {
             </a>
           </div>
         </div>
-        <div className="border-t border-line lg:col-span-9">
+        <div className="border-t border-line lg:col-span-8">
           {faqs.map((f, i) => (
             <details key={f.q} open={i === 0} className="group border-b border-line">
               <summary className="flex min-h-16 cursor-pointer items-center justify-between gap-6 py-3.5 text-[16px] font-medium text-ink">
