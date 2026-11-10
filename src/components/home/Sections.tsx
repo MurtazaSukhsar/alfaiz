@@ -54,6 +54,9 @@ export function Edit() {
 
 /* ---------------------------------------------------------------- All categories (index grid) */
 
+/** Extra zoom for category photos with a lot of empty space around the product. */
+const TILE_ZOOM: Record<string, number> = { 'caster-wheels': 1.75, 'adhesives-sealants': 1.3, 'packaging-and-sealing': 1.15 };
+
 const EXTRA_CATEGORIES = ['construction-tools', 'wood-works', 'scaffolding'];
 
 export function Categories() {
@@ -84,10 +87,16 @@ export function Categories() {
             <li key={t.handle} className="reveal">
               <Link
                 href={`/collections/${t.handle}/`}
-                className="spot group flex h-full flex-col items-center gap-2 rounded-[20px] bg-white p-2.5 pb-3 text-center ring-1 ring-line-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_32px_-20px_rgba(21,23,26,.45)] hover:ring-accent/40 sm:p-3 sm:pb-4"
+                className="spot group flex h-full flex-col items-center gap-2 rounded-[20px] bg-white p-2 pb-3 text-center ring-1 ring-line-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_32px_-20px_rgba(21,23,26,.45)] hover:ring-accent/40 sm:p-3 sm:pb-4"
               >
-                <span className="grid aspect-square w-full place-items-center rounded-2xl bg-[#F4F4F1] p-3 transition duration-300 group-hover:bg-accent-soft sm:p-4">
-                  <img src={t.image} alt="" loading="lazy" className="max-h-full max-w-full object-contain mix-blend-multiply transition duration-500 ease-out group-hover:scale-110" />
+                <span className="grid aspect-square w-full place-items-center overflow-hidden rounded-2xl bg-[#F4F4F1] p-1 transition duration-300 group-hover:bg-accent-soft sm:p-1.5">
+                  <img
+                    src={t.image}
+                    alt=""
+                    loading="lazy"
+                    style={{ '--z': TILE_ZOOM[t.handle] ?? 1.06 } as CSSProperties}
+                    className="h-full w-full scale-[var(--z)] object-contain mix-blend-multiply transition duration-500 ease-out group-hover:scale-[calc(var(--z)*1.08)]"
+                  />
                 </span>
                 <span className="text-[12.5px] font-semibold leading-tight text-ink sm:text-[14px]">{t.title}</span>
                 <span className="-mt-1 text-[11.5px] text-muted sm:text-[12.5px]">
@@ -293,15 +302,15 @@ export function TrustStrip() {
   return (
     <section id="about" aria-label="Why buy from Al Faiz" className="pt-4 sm:pt-5">
       <div className="wrap">
-        <ul className="grid gap-px overflow-hidden rounded-2xl border border-line-soft bg-line-soft sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line-soft bg-line-soft lg:grid-cols-4">
           {features.map((f) => (
-            <li key={f.title} className="flex items-center gap-4 bg-white p-5">
-              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[#F3F4F1] text-ink">
-                <Icon name={f.icon as IconName} size={20} />
+            <li key={f.title} className="flex flex-col items-start gap-2.5 bg-white p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent sm:size-11">
+                <Icon name={f.icon as IconName} size={18} />
               </span>
               <span className="flex flex-col gap-0.5">
-                <span className="text-[15px] font-semibold">{f.title}</span>
-                <span className="text-[13px] leading-snug text-muted">{f.short}</span>
+                <span className="text-[14px] font-semibold leading-tight sm:text-[15px]">{f.title}</span>
+                <span className="text-[12.5px] leading-snug text-muted sm:text-[13px]">{f.short}</span>
               </span>
             </li>
           ))}

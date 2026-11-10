@@ -8,6 +8,9 @@ import { Breadcrumbs, JsonLd } from '@/components/Section';
 import { site, waLink } from '@/data/site';
 import { getProduct, primaryCategory, products, related, toCard } from '@/lib/catalog';
 import { fullName, imgUrl } from '@/lib/format';
+import { keySpecs, splitSpecs } from '@/lib/specs';
+import { ReadMore } from '@/components/ReadMore';
+import { SpecTables } from '@/components/SpecTables';
 
 type Params = { params: Promise<{ handle: string }> };
 
@@ -38,6 +41,8 @@ export default async function ProductPage({ params }: Params) {
   const cat = primaryCategory(p);
   const rel = related(p, 4).map((r) => toCard(r));
   const title = fullName(p.name, p.brand);
+  const { html: description, tables } = splitSpecs(p.html);
+  const headline = keySpecs(tables);
 
   return (
     <>
@@ -108,6 +113,23 @@ export default async function ProductPage({ params }: Params) {
               </div>
             )}
 
+            {headline.length > 0 && (
+              <div className="rounded-2xl bg-white p-4 ring-1 ring-line-soft sm:p-5">
+                <dl className="grid grid-cols-2 gap-x-5 gap-y-3">
+                  {headline.map(([k, v]) => (
+                    <div key={k} className="flex min-w-0 flex-col gap-0.5">
+                      <dt className="truncate text-[12px] font-medium uppercase tracking-[0.06em] text-muted">{k}</dt>
+                      <dd className="text-[15px] font-semibold leading-snug text-ink">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <a href="#specifications" className="nudge-host mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent">
+                  All specifications
+                  <Icon name="arrow" size={14} strokeWidth={2.2} className="nudge rotate-90" />
+                </a>
+              </div>
+            )}
+
             <QuoteBox item={{ handle: p.handle, name: p.name, brand: p.brand, image: p.images[0]?.src ?? '' }} price={p.price} available={p.available} />
 
             <ul className="flex flex-col gap-3.5 text-sm text-ink-2">
@@ -134,12 +156,21 @@ export default async function ProductPage({ params }: Params) {
         </div>
       </section>
 
-      {p.html && (
+      {(description || tables.length > 0) && (
         <section className="border-y border-line bg-white py-14">
           <div className="wrap grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div>
-              <h2 className="mb-5 text-2xl font-bold tracking-[-0.02em]">Product details</h2>
-              <div className="prose-af" dangerouslySetInnerHTML={{ __html: p.html }} />
+            <div className="flex min-w-0 flex-col gap-12">
+              {description && (
+                <div>
+                  <h2 className="mb-5 text-2xl font-bold tracking-[-0.02em]">Product details</h2>
+                  <ReadMore html={description} />
+                </div>
+              )}
+              {tables.length > 0 && (
+                <div id="specifications" className="scroll-mt-32">
+                  <SpecTables tables={tables} />
+                </div>
+              )}
             </div>
             <aside className="flex flex-col gap-3 self-start rounded-2xl border border-line-soft bg-[#F8F8F6] p-6 lg:sticky lg:top-[140px]">
               <span className="text-base font-semibold">Need help choosing?</span>
