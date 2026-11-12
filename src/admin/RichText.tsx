@@ -3,7 +3,8 @@
 // plus an "HTML" switch for pasting a ready-made description or spec table.
 
 import { useEffect, useRef, useState } from 'react';
-import { cx, Textarea } from './ui';
+import { cx, Spinner, Textarea, toast } from './ui';
+import { prepareImage, uploadFile } from './sb';
 
 const TOOLS: { label: string; title: string; run: () => void; cls?: string }[] = [
   { label: 'B', title: 'Bold', run: () => document.execCommand('bold'), cls: 'font-bold' },
@@ -23,8 +24,11 @@ const TOOLS: { label: string; title: string; run: () => void; cls?: string }[] =
   { label: 'Clear', title: 'Remove formatting', run: () => document.execCommand('removeFormat') },
 ];
 
-export function RichText({ value, onChange, label = 'Description', help }: { value: string; onChange: (html: string) => void; label?: string; help?: string }) {
+export function RichText({ value, onChange, label = 'Description', help, imageFolder }: { value: string; onChange: (html: string) => void; label?: string; help?: string; imageFolder?: string }) {
   const ref = useRef<HTMLDivElement>(null);
+  const file = useRef<HTMLInputElement>(null);
+  const caret = useRef<Range | null>(null);
+  const [uploading, setUploading] = useState(false);
   const last = useRef<string | null>(null);
   const [source, setSource] = useState(false);
 
@@ -65,6 +69,57 @@ export function RichText({ value, onChange, label = 'Description', help }: { val
                 {t.label}
               </button>
             ))}
+          {!source && imageFolder && (
+            <button
+              type="button"
+              title="Insert a photo where the cursor is"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                const sel = window.getSelection();
+                caret.current = sel && sel.rangeCount && ref.current?.contains(sel.anchorNode) ? sel.getRangeAt(0).cloneRange() : null;
+              }}
+              onClick={() => file.current?.click()}
+              className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-[13px] text-ink-2 hover:bg-white hover:text-ink"
+            >
+              {uploading && <Spinner className="size-3" />}
+              Photo
+            </button>
+          )}
+          <input
+            ref={file}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={async (e) => {
+              const f = e.target.files?.[0];
+              e.target.value = '';
+              if (!f || !imageFolder) return;
+              setUploading(true);
+              try {
+                const blob = await prepareImage(f, 1600);
+                const ext = blob.type === 'image/webp' ? 'webp' : (f.name.split('.').pop() || 'jpg').toLowerCase();
+                const url = await uploadFile(`${imageFolder}/${Date.now().toString(36)}-${f.name.replace(/\.[^.]+$/, '').slice(0, 50)}.${ext}`, blob);
+                const el = ref.current;
+                if (!el) return;
+                el.focus();
+                const sel = window.getSelection();
+                if (caret.current && sel) {
+                  sel.removeAllRanges();
+                  sel.addRange(caret.current);
+                } else if (sel) {
+                  sel.selectAllChildren(el);
+                  sel.collapseToEnd();
+                }
+                document.execCommand('insertHTML', false, `<p><img src="${url}" alt=""></p>`);
+                emit();
+                toast('Photo added');
+              } catch (err) {
+                toast((err as Error).message, 'error');
+              } finally {
+                setUploading(false);
+              }
+            }}
+          />
           <button
             type="button"
             onClick={() => {

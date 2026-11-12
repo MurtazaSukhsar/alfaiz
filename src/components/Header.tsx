@@ -9,7 +9,6 @@ import { AnnouncementBar } from './AnnouncementBar';
 import { Icon } from './Icons';
 import { Logo } from './Logo';
 import { useQuote } from './QuoteProvider';
-import { LimelightPill, useLimelight } from './fx/Limelight';
 import { SearchBox } from './SearchBox';
 
 const links = [
@@ -62,7 +61,7 @@ export function Header({ categories, brands, total }: { categories: Facet[]; bra
   return (
     <>
       <AnnouncementBar />
-      <header className="sticky top-0 z-40 border-b border-[#E6E7E4] bg-white/95 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-[#E6E7E4] bg-white lg:bg-white/95 lg:backdrop-blur-md">
         <div className="wrap flex flex-wrap items-center gap-x-2 py-2.5 sm:gap-x-4 lg:h-[72px] lg:flex-nowrap lg:py-0">
           <Logo />
 
@@ -91,12 +90,12 @@ export function Header({ categories, brands, total }: { categories: Facet[]; bra
             <Link
               href="/cart/"
               aria-label={`Cart${ready && count ? `, ${count} item${count === 1 ? '' : 's'}` : ''}`}
-              className="relative ml-1 inline-flex h-10 items-center gap-2 rounded-full bg-ink px-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-accent hover:shadow-[0_12px_22px_-10px_rgba(21,23,26,.45)] active:scale-95 sm:ml-1.5 sm:pl-3.5 sm:pr-2"
+              className="relative ml-1 inline-flex h-10 items-center gap-2 rounded-lg bg-ink px-3 text-sm font-semibold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-accent hover:shadow-[0_12px_22px_-10px_rgba(21,23,26,.45)] active:scale-95 sm:ml-1.5 sm:pl-3.5 sm:pr-2"
             >
               <Icon name="cart" size={18} strokeWidth={1.9} />
               <span className="hidden sm:inline">Cart</span>
               <span
-                className={`grid h-6 min-w-6 place-items-center rounded-full px-1.5 text-[11px] font-bold ${
+                className={`grid h-6 min-w-6 place-items-center rounded-md px-1.5 text-[11px] font-bold ${
                   ready && count > 0 ? 'bg-accent text-white' : 'bg-white/15 text-white'
                 } max-sm:absolute max-sm:-right-1 max-sm:-top-1 max-sm:h-5 max-sm:min-w-5 max-sm:ring-2 max-sm:ring-white ${ready && count > 0 ? '' : 'max-sm:hidden'}`}
               >
@@ -167,23 +166,21 @@ function MainNav({
   brands: Facet[];
   total: number;
 }) {
-  const active = links.findIndex((l) => isCurrent(l.href));
-  const { ref, box, ready, bind } = useLimelight<HTMLUListElement>(active, true);
   return (
     <nav aria-label="Main" className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] lg:overflow-visible">
-      <ul ref={ref} {...bind} className="relative inline-flex gap-0.5 rounded-full bg-chip p-1">
-        <LimelightPill box={box} ready={ready} beam={active >= 0} />
+      <ul className="relative inline-flex gap-0.5 rounded-lg bg-chip p-1">
         {links.map((l) => {
           const current = isCurrent(l.href);
           return (
-            <li key={l.href} className="group relative shrink-0" data-lime={current ? 'on' : ''}>
+            <li key={l.href} className="group relative shrink-0">
+              {/* simple highlight: white on the current page, soft white on hover (no moving effects) */}
               <Link
                 href={l.href}
                 aria-current={current ? 'page' : undefined}
-                className={`inline-flex h-9 items-center gap-1 rounded-full px-3.5 text-[14.5px] transition ${
+                className={`inline-flex h-9 items-center gap-1 rounded-md px-3.5 text-[14.5px] transition-colors duration-150 ${
                   current
-                    ? 'font-semibold text-ink'
-                    : 'font-medium text-ink-2 hover:text-ink'
+                    ? 'bg-white font-semibold text-ink shadow-[0_1px_2px_rgba(21,23,26,.08)]'
+                    : 'font-medium text-ink-2 hover:bg-white/70 hover:text-ink group-hover:bg-white/70 group-hover:text-ink'
                 }`}
               >
                 {l.label}
@@ -202,14 +199,14 @@ function MainNav({
 
 function ProductsMenu({ categories, brands, total }: { categories: Facet[]; brands: Facet[]; total: number }) {
   return (
-    <div className="invisible absolute -left-24 top-full z-50 hidden w-[720px] translate-y-1 pt-[22px] opacity-0 transition duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 lg:block">
-      <div className="grid grid-cols-[2fr_1fr] gap-8 rounded-2xl border border-line bg-white p-6 shadow-[0_24px_48px_rgba(21,23,26,.14)]">
+    <div className="invisible absolute -left-24 top-full z-50 hidden w-[720px] pt-[22px] opacity-0 transition-opacity duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 lg:block">
+      <div className="grid grid-cols-[2fr_1fr] gap-6 rounded-lg border border-line bg-white p-5 shadow-[0_24px_48px_rgba(21,23,26,.14)]">
         <div>
           <p className="eyebrow mb-3 text-muted">Categories</p>
-          <ul className="grid grid-cols-2 gap-x-6">
+          <ul className="grid grid-cols-2 gap-x-2">
             {categories.map((c) => (
               <li key={c.handle}>
-                <Link href={`/collections/${c.handle}/`} className="flex min-h-9 items-center justify-between gap-3 text-[14px] text-ink-2 hover:text-accent">
+                <Link href={`/collections/${c.handle}/`} className="-mx-2.5 flex min-h-9 items-center justify-between gap-3 rounded-md px-2.5 text-[14px] text-ink-2 transition-colors duration-150 hover:bg-chip hover:text-ink">
                   {c.title}
                 </Link>
               </li>
@@ -221,7 +218,7 @@ function ProductsMenu({ categories, brands, total }: { categories: Facet[]; bran
           <ul className="grid gap-x-6">
             {brands.slice(0, 12).map((c) => (
               <li key={c.handle}>
-                <Link href={`/collections/${c.handle}/`} className="flex min-h-9 items-center justify-between gap-3 text-[14px] text-ink-2 hover:text-accent">
+                <Link href={`/collections/${c.handle}/`} className="-mx-2.5 flex min-h-9 items-center justify-between gap-3 rounded-md px-2.5 text-[14px] text-ink-2 transition-colors duration-150 hover:bg-chip hover:text-ink">
                   {c.title}
                 </Link>
               </li>

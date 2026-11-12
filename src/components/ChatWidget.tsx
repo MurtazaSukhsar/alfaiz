@@ -245,7 +245,7 @@ export function ChatWidget() {
             const a = (e.target as HTMLElement).closest('a');
             if (a && a.getAttribute('href')?.startsWith('/') && window.matchMedia('(max-width: 639px)').matches) setOpen(false);
           }}
-          className="anim-chat fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#F6F6F3] sm:inset-auto sm:bottom-[96px] sm:right-5 sm:h-[min(640px,calc(100svh-130px))] sm:w-[400px] sm:rounded-[24px] sm:shadow-[0_30px_70px_-20px_rgba(21,23,26,.45)] sm:ring-1 sm:ring-line-soft"
+          className="anim-chat fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#F6F6F3] sm:inset-auto sm:bottom-[96px] sm:right-5 sm:h-[min(640px,calc(100svh-130px))] sm:w-[400px] sm:rounded-[10px] sm:shadow-[0_30px_70px_-20px_rgba(21,23,26,.45)] sm:ring-1 sm:ring-line-soft"
         >
           <div className="flex items-center gap-3 bg-ink px-4 py-3.5 text-white">
             <span className="grid size-11 place-items-center rounded-full bg-white">
@@ -292,7 +292,7 @@ export function ChatWidget() {
             }}
             className="border-t border-line-soft bg-white p-3"
           >
-            <div className="flex items-center gap-2 rounded-full bg-[#F1F2EF] pl-4 pr-1.5 ring-1 ring-transparent transition focus-within:bg-white focus-within:ring-ink/20">
+            <div className="flex items-center gap-2 rounded-lg bg-[#F1F2EF] pl-4 pr-1.5 ring-1 ring-transparent transition focus-within:bg-white focus-within:ring-ink/20">
               <label htmlFor="chat-input" className="sr-only">
                 Ask the Al Faiz assistant
               </label>
@@ -427,7 +427,7 @@ function BotBubble({
                   {p.n}
                 </Link>
                 <span className="mt-auto flex gap-1.5 pt-2">
-                  <Link href={`/products/${p.h}/`} className="flex h-8 flex-1 items-center justify-center rounded-full bg-[#F1F2EF] text-[12px] font-semibold text-ink hover:bg-[#E7E8E4]">
+                  <Link href={`/products/${p.h}/`} className="flex h-8 flex-1 items-center justify-center rounded-md bg-[#F1F2EF] text-[12px] font-semibold text-ink hover:bg-[#E7E8E4]">
                     View
                   </Link>
                   <button

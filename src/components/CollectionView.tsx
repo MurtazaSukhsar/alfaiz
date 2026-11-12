@@ -90,7 +90,7 @@ export function CollectionView({
             rel="noopener"
             className="nudge-host inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent"
           >
-            Ask on WhatsApp
+            Enquire on WhatsApp
             <Icon name="arrow" size={15} strokeWidth={2.2} className="nudge" />
           </a>
         </div>

@@ -11,7 +11,8 @@ Hasan edits them in the **admin panel** at `/admin/` (e.g. https://www.alfaizhar
 | --- | --- |
 | Products | Add / edit / hide / delete products: name, brand, categories, photos (upload), description, in stock, featured, industries |
 | Categories & brands | Add / rename / hide brands and categories, their image and description |
-| Home page → Hero, Trust strip, Brands strip, Shop by category, Featured products, The Brand Edit, Industries, Testimonials, FAQ | Every home section (texts, order, products, photos, logos) |
+| Home page → Hero (full-width slides, one per category), Trust strip, Brands strip, Shop by category, Featured products, The Brand Edit, Industries, Testimonials, FAQ | Every home section (texts, order, products, photos, logos) |
+| Other pages → Blog | Write, edit, hide or delete blog articles (cover photo, photos inside the text) — shown at `/blog/`, linked in the footer |
 | Other pages → FAQ page, Footer links | Full FAQ page and footer range links |
 | Website → Contact & settings | Phone, WhatsApp, emails, address, map, Instagram, top-bar messages, export countries |
 | Website → Publish | Rebuilds the website so the saved changes go live (about 1–2 minutes) |

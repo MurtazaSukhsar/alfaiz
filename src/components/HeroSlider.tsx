@@ -82,7 +82,7 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
                   tabIndex={active ? 0 : -1}
                   data-active={active}
                   draggable={false}
-                  className="hs-slide group relative isolate col-start-1 row-start-1 grid select-none overflow-hidden rounded-[24px] ring-1 ring-line-soft lg:grid-cols-[4.3fr_7.7fr]"
+                  className="hs-slide group relative isolate col-start-1 row-start-1 grid select-none overflow-hidden rounded-[10px] ring-1 ring-line-soft lg:grid-cols-[4.3fr_7.7fr]"
                   style={{ background: s.bg, '--accent': s.accent, '--on-accent': s.onAccent } as CSSProperties}
                 >
                   <span aria-hidden="true" className="hs-mark pointer-events-none absolute -bottom-[0.18em] right-[-0.04em] -z-10 whitespace-nowrap text-[clamp(110px,17vw,240px)] font-extrabold leading-none tracking-[-0.06em] text-[var(--accent)] opacity-[0.16]">

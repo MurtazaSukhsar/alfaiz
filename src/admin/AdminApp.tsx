@@ -13,6 +13,7 @@ import { CollectionEdit, CollectionList } from './views/Collections';
 import { SectionEdit } from './views/SectionEdit';
 import { Featured } from './views/Featured';
 import { PublishView, usePending } from './views/Publish';
+import { BlogEdit, BlogList } from './views/Blog';
 
 type Phase = 'start' | 'login' | 'denied' | 'loading' | 'ready' | 'error';
 
@@ -194,7 +195,10 @@ const NAV: { group: string; items: NavItem[] }[] = [
       sec('faqs', 'help'),
     ],
   },
-  { group: 'Other pages', items: [sec('faqGroups', 'help'), sec('footer', 'menu')] },
+  {
+    group: 'Other pages',
+    items: [{ href: '#/blog', label: 'Blog', icon: 'quote', match: (p) => p.startsWith('/blog') }, sec('faqGroups', 'help'), sec('footer', 'menu')],
+  },
   { group: 'Website', items: [sec('settings', 'phone'), { href: '#/publish', label: 'Publish', icon: 'globe', match: (p) => p === '/publish' }] },
 ];
 
@@ -203,7 +207,7 @@ function Shell() {
   const [menu, setMenu] = useState(false);
   const { admin } = useStore();
   const pending = usePending(admin.last_publish);
-  const waiting = pending.products + pending.collections + pending.sections;
+  const waiting = pending.products + pending.collections + pending.sections + pending.posts;
   useEffect(() => setMenu(false), [route.path]);
 
   const [, root, id] = route.path.split('/');
@@ -218,6 +222,10 @@ function Shell() {
       <CollectionList query={route.query} />
     ) : root === 'section' && id ? (
       <SectionEdit key={id} sectionKey={id} />
+    ) : root === 'blog' && id ? (
+      <BlogEdit key={id} slug={decodeURIComponent(id)} />
+    ) : root === 'blog' ? (
+      <BlogList />
     ) : root === 'featured' ? (
       <Featured />
     ) : root === 'publish' ? (

@@ -10,14 +10,15 @@ const HOOK = /^https:\/\/api\.vercel\.com\/v1\/integrations\/deploy\/[A-Za-z0-9_
 
 /** How many things were saved since the last publish (nothing is counted before the first publish). */
 export function usePending(lastPublish?: string) {
-  const { products, collections, contentUpdated } = useStore();
-  if (!lastPublish) return { products: 0, collections: 0, sections: 0, never: true };
+  const { products, collections, contentUpdated, posts } = useStore();
+  if (!lastPublish) return { products: 0, collections: 0, sections: 0, posts: 0, never: true };
   const since = new Date(lastPublish).getTime();
   const newer = (t?: string) => !!t && new Date(t).getTime() > since;
   return {
     products: products.filter((p) => newer(p.updated_at)).length,
     collections: collections.filter((c) => newer(c.updated_at)).length,
     sections: Object.values(contentUpdated).filter((t) => newer(t)).length,
+    posts: posts.filter((b) => newer(b.updated_at)).length,
     never: false,
   };
 }
@@ -53,7 +54,7 @@ export function PublishView() {
   const [hook, setHook] = useState(settings.vercel_deploy_hook || '');
   const [savingHook, setSavingHook] = useState(false);
 
-  const total = pending.products + pending.collections + pending.sections;
+  const total = pending.products + pending.collections + pending.sections + pending.posts;
   const saveHook = async () => {
     const v = hook.trim();
     if (v && !HOOK.test(v)) return toast('That doesn’t look like a Vercel deploy hook (it starts with https://api.vercel.com/v1/integrations/deploy/).', 'error');
@@ -84,7 +85,7 @@ export function PublishView() {
                 <p className="text-[15px] font-semibold text-ink">
                   {total} saved change{total > 1 ? 's' : ''} waiting
                   <span className="mt-1 block text-[13px] font-normal text-muted">
-                    {[pending.products && `${pending.products} product${pending.products > 1 ? 's' : ''}`, pending.collections && `${pending.collections} brand/category`, pending.sections && `${pending.sections} home section${pending.sections > 1 ? 's' : ''}`]
+                    {[pending.products && `${pending.products} product${pending.products > 1 ? 's' : ''}`, pending.collections && `${pending.collections} brand/category`, pending.sections && `${pending.sections} home section${pending.sections > 1 ? 's' : ''}`, pending.posts && `${pending.posts} blog article${pending.posts > 1 ? 's' : ''}`]
                       .filter(Boolean)
                       .join(' · ')}
                   </span>
@@ -98,7 +99,7 @@ export function PublishView() {
               Publish to website
             </Button>
             {!settings.vercel_deploy_hook && <p className="text-[13px] text-accent">Add the Vercel deploy hook (right) to switch on publishing.</p>}
-            <p className="text-[13px] leading-relaxed text-muted">The website is rebuilt with everything saved here (products, brands, categories and home sections). It takes about 1–2 minutes; refresh the website after that.</p>
+            <p className="text-[13px] leading-relaxed text-muted">The website is rebuilt with everything saved here (products, brands, categories, home sections and blog). It takes about 1–2 minutes; refresh the website after that.</p>
           </div>
         </Card>
         <Card title="Connection to Vercel" desc="One-time setup, usually done by your web developer.">

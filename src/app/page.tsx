@@ -31,13 +31,12 @@ export default function Home() {
         <h1 className="sr-only">Al Faiz Electric &amp; Hardware — tools that work as hard as you do. Tools and industrial supplies across the UAE</h1>
         <Hero />
         <TrustStrip />
-        <BrandMarquee />
-        <Categories />
-        <Featured />
-        <Edit />
-        <Industries />
-        <Testimonials />
-        <Faq />
+        {/* below the fold: rendered lazily by the browser (see .cv-auto) */}
+        {[BrandMarquee, Categories, Featured, Edit, Industries, Testimonials, Faq].map((S, i) => (
+          <div key={i} className="cv-auto">
+            <S />
+          </div>
+        ))}
       </div>
     </>
   );

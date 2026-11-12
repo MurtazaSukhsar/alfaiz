@@ -53,7 +53,7 @@ export function FaqBrowser({ groups }: { groups: FaqGroup[] }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-[14px] bg-white shadow-[0_1px_2px_rgba(21,23,26,.05),0_30px_60px_-40px_rgba(21,23,26,.4)] ring-1 ring-line-soft">
+    <div className="overflow-hidden rounded-[10px] bg-white shadow-[0_1px_2px_rgba(21,23,26,.05),0_30px_60px_-40px_rgba(21,23,26,.4)] ring-1 ring-line-soft">
       {/* topic tabs + search */}
       <div className="flex flex-col gap-3 border-b border-line-soft p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
         <div ref={lime.ref} role="tablist" aria-label="FAQ topics" className="relative -mx-1 flex gap-1 overflow-x-auto px-1 [scrollbar-width:none]">
@@ -164,7 +164,7 @@ export function FaqBrowser({ groups }: { groups: FaqGroup[] }) {
             <span>Still unsure? We reply fast.</span>
             <a href={waLink(selected ? `Hello Al Faiz, about “${selected.q}”: ` : undefined)} target="_blank" rel="noopener" className="chat-chip">
               <Icon name="chat" size={13} strokeWidth={2} />
-              Ask on WhatsApp
+              Enquire on WhatsApp
             </a>
           </div>
         </div>

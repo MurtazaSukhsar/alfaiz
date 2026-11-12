@@ -33,12 +33,17 @@ export function FxRuntime() {
     );
     const watch = () => document.querySelectorAll('[data-reveal-text]:not(.is-in)').forEach((el) => (reduce ? el.classList.add('is-in') : io.observe(el)));
     watch();
-    // pick up headings on pages opened later (client navigation)
-    const mo = new MutationObserver(() => watch());
+    // pick up headings on pages opened later (client navigation) — at most once per frame,
+    // not on every single DOM change (the hero slider and tickers change the DOM a lot)
+    let queued = 0;
+    const mo = new MutationObserver(() => {
+      if (!queued) queued = requestAnimationFrame(() => ((queued = 0), watch()));
+    });
     mo.observe(document.body, { childList: true, subtree: true });
 
     return () => {
       window.removeEventListener('pointermove', onMove);
+      cancelAnimationFrame(queued);
       io.disconnect();
       mo.disconnect();
     };

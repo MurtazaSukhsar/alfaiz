@@ -181,7 +181,7 @@ export default async function ProductPage({ params }: Params) {
                 rel="noopener"
                 className="nudge-host inline-flex min-h-11 items-center gap-2 self-start text-sm font-bold text-accent"
               >
-                Ask on WhatsApp
+                Talk to an expert
                 <Icon name="arrow" size={15} strokeWidth={2.2} className="nudge" />
               </a>
             </aside>

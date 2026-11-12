@@ -4,7 +4,7 @@
 // Safe to import anywhere (client components included).
 
 import raw from '../../data/content.json';
-import { defaultSettings, makeDefaults, type SiteContent } from './content';
+import { defaultSettings, makeDefaults, type HeroSlide, type SiteContent } from './content';
 
 export type { FaqGroup, FaqItem } from './content';
 
@@ -46,9 +46,14 @@ export function brandLogo(handle: string): string {
   return brandStrip.find((b) => b.handle === handle)?.logo || `/brands/${handle}.png`;
 }
 
-/** Home hero: headline, text and the product tiles on the right. */
-export const hero = obj(edited.hero, defaults.hero);
-hero.tiles = list(hero.tiles, defaults.hero.tiles);
+/** Home hero: full-width slides (background photo with products + quote text), one per category. */
+const editedSlides = (edited.hero as { slides?: unknown } | undefined)?.slides;
+export const hero = {
+  slides: list<HeroSlide>(editedSlides, defaults.hero.slides)
+    .filter((s) => s && s.image && s.title1)
+    .map((s) => ({ ...s, image: s.image.startsWith('/') ? s.image : safeUrl(s.image, '') }))
+    .filter((s) => s.image),
+};
 
 /** "Shop by category" tiles on the home page, in order. */
 export const homeCategories = list(edited.categories, defaults.categories);

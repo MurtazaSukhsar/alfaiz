@@ -24,7 +24,7 @@ export function AddToQuote({ item }: { item: Omit<QuoteItem, 'qty'> }) {
         href="/cart/"
         title="In your cart"
         aria-label={`${item.name} is in your cart`}
-        className="fx inline-flex h-9 items-center gap-1.5 rounded-full bg-ink pl-2.5 pr-3 text-[13px] font-semibold text-white hover:bg-accent"
+        className="fx inline-flex h-9 items-center gap-1.5 rounded-md bg-ink pl-2.5 pr-3 text-[13px] font-semibold text-white hover:bg-accent"
       >
         <Icon name="check" size={14} strokeWidth={2.4} />
         In cart

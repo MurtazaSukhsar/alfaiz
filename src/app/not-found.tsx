@@ -19,7 +19,7 @@ export default function NotFound() {
             </span>
           </Link>
           <a href={waLink()} target="_blank" rel="noopener" className="btn btn-light">
-            Ask on WhatsApp
+            Enquire on WhatsApp
             <span className="btn-chev">
               <Icon name="chev" size={16} strokeWidth={2.2} />
             </span>

@@ -268,7 +268,7 @@ export function ImageInput({ value, onChange, folder, label = 'Image', help, con
     if (!f.type.startsWith('image/')) return toast('Please choose an image file (JPG, PNG, WebP or SVG).', 'error');
     setBusy(true);
     try {
-      const blob = await prepareImage(f);
+      const blob = await prepareImage(f, folder === 'hero' ? 2200 : 1600);
       const ext = blob.type === 'image/webp' ? 'webp' : (f.name.split('.').pop() || 'jpg').toLowerCase();
       const base = f.name.replace(/\.[^.]+$/, '').slice(0, 60) || 'image';
       const url = await uploadFile(`${folder}/${Date.now().toString(36)}-${base}.${ext}`, blob);

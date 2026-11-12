@@ -21,7 +21,7 @@ export function TestimonialsSection({ title, description, testimonials, classNam
       aria-hidden={hidden || undefined}
       className="animate-marquee flex shrink-0 flex-row justify-around [gap:var(--gap)] group-hover:[animation-play-state:paused]"
     >
-      {[...Array(4)].map((_, setIndex) =>
+      {[...Array(2)].map((_, setIndex) =>
         testimonials.map((testimonial, i) => <TestimonialCard key={`${setIndex}-${i}`} {...testimonial} />),
       )}
     </div>
@@ -36,7 +36,8 @@ export function TestimonialsSection({ title, description, testimonials, classNam
         </div>
 
         <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
-          <div className="group flex flex-row overflow-hidden p-2 [--duration:40s] [--gap:1rem] [gap:var(--gap)]">
+          {/* full width + left-aligned: the two tracks always cover the box (centred, the loop showed a gap at the end) */}
+          <div className="group flex w-full flex-row overflow-hidden p-2 [--duration:22s] [--gap:1rem]">
             <Track />
             <Track hidden />
           </div>

@@ -64,6 +64,7 @@ export function Footer() {
             <Link href="/collections/all/" className="hover:text-white">All Products</Link>
             <Link href="/#brands" className="hover:text-white">Brands</Link>
             <Link href="/pages/faq/" className="hover:text-white">FAQ</Link>
+            <Link href="/blog/" className="hover:text-white">Blog</Link>
             <Link href="/cart/" className="hover:text-white">Cart</Link>
             <Link href="/pages/bulk-special-product-request/" className="hover:text-white">Bulk &amp; Special Requests</Link>
             <Link href="/pages/contact/" className="hover:text-white">Contact</Link>

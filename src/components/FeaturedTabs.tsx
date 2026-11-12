@@ -16,7 +16,7 @@ export function FeaturedTabs({ tabs, heading }: { tabs: { id: string; label: str
         <div
           role="tablist"
           aria-label="Featured product groups"
-          className="-mx-1 mb-6 flex max-w-[calc(100%+8px)] gap-0.5 overflow-x-auto rounded-full bg-chip p-1 [scrollbar-width:none] sm:mb-10"
+          className="-mx-1 mb-6 flex max-w-[calc(100%+8px)] gap-0.5 overflow-x-auto rounded-lg bg-chip p-1 [scrollbar-width:none] sm:mb-10"
         >
           {tabs.map((t) => {
             const on = t.id === tab.id;

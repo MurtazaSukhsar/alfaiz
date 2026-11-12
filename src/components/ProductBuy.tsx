@@ -93,7 +93,7 @@ export function QuoteBox({
             <Icon name="plus" size={16} strokeWidth={2} />
           </button>
         </div>
-        {!available && <span className="rounded-full bg-ink px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white">Sold out — ask for lead time</span>}
+        {!available && <span className="rounded-md bg-ink px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white">Sold out — ask for lead time</span>}
       </div>
 
       <div className="flex flex-col gap-2.5">
@@ -127,7 +127,7 @@ export function QuoteBox({
         <a href={waLink(msg)} target="_blank" rel="noopener" className="btn btn-light justify-between normal-case tracking-normal">
           <span className="flex items-center gap-2.5">
             <Icon name="chat" size={18} />
-            Ask on WhatsApp
+            Enquire on WhatsApp
           </span>
           <span className="btn-chev">
             <Icon name="chev" size={16} strokeWidth={2.2} />

@@ -72,7 +72,7 @@ export function SearchResults() {
               </span>
               <div className="mt-3 flex flex-wrap justify-center gap-3">
                 <a href={waLink(`Hello Al Faiz, do you have: ${q}?`)} target="_blank" rel="noopener" className="btn btn-sm btn-primary">
-                  Ask on WhatsApp
+                  Enquire on WhatsApp
                   <span className="btn-chev">
                     <Icon name="chev" size={14} strokeWidth={2.2} />
                   </span>

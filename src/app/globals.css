@@ -64,7 +64,7 @@
     gap: 0.875rem;
     height: 3.25rem;
     padding: 0 0.375rem 0 1.375rem;
-    border-radius: 9999px;
+    border-radius: 8px;
     font-size: 0.9375rem;
     font-weight: 600;
     letter-spacing: 0;
@@ -84,7 +84,7 @@
   .btn-chev {
     width: 2.625rem;
     height: 2.625rem;
-    border-radius: 9999px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -147,7 +147,7 @@
     gap: 0.5rem;
     height: 2.75rem;
     padding: 0 1.25rem;
-    border-radius: 9999px;
+    border-radius: 8px;
     font-size: 0.9375rem;
     font-weight: 600;
     white-space: nowrap;
@@ -172,7 +172,7 @@
     place-items: center;
     width: 2rem;
     height: 2rem;
-    border-radius: 9999px;
+    border-radius: 6px;
   }
   .pill-lg .pill-dot {
     width: 2.375rem;
@@ -241,7 +241,7 @@
     gap: 0.375rem;
     min-height: 2.25rem;
     padding: 0 0.875rem;
-    border-radius: 9999px;
+    border-radius: 8px;
     background: #fff;
     border: 1px solid var(--color-line);
     font-size: 0.8125rem;
@@ -285,7 +285,7 @@
   .card {
     background: #fff;
     border: 1px solid var(--color-line);
-    border-radius: 10px;
+    border-radius: 8px;
   }
   .lift {
     transition:
@@ -429,6 +429,39 @@
     color: var(--color-muted);
     font-weight: 500;
   }
+  .prose-af img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  .prose-af figcaption {
+    margin-top: 0.4rem;
+    font-size: 0.875rem;
+    color: var(--color-muted);
+  }
+  /* Blog articles: a little larger and roomier than product descriptions */
+  .prose-blog {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+  .prose-blog h2 {
+    font-size: 1.5rem;
+    letter-spacing: -0.015em;
+  }
+  .prose-blog table {
+    display: table;
+    border: 1px solid var(--color-line-soft);
+    border-radius: 8px;
+  }
+  .prose-blog th,
+  .prose-blog td {
+    padding: 0.7rem 0.9rem;
+  }
+  .prose-blog thead th {
+    background: #f6f6f4;
+    color: var(--color-ink);
+    font-weight: 600;
+  }
 }
 
 /* ---------- Motion (kept light; switched off for reduced-motion users) ---------- */
@@ -478,25 +511,30 @@
   background-color: #f5f5f3;
 }
 
-/* 21st.dev-style marquee: two identical tracks slide left by their own width plus the gap */
+/* 21st.dev-style marquee: two identical tracks slide left by their own width.
+   Each track carries its trailing gap as padding, so the keyframes are a plain -100%
+   (no var()/calc) and the browser can run them on the GPU instead of every frame on the main thread. */
 @layer components {
   .animate-marquee {
+    padding-right: var(--gap, 1rem);
     animation: marquee-x var(--duration, 40s) linear infinite;
   }
 }
 @keyframes marquee-x {
   from { transform: translateX(0); }
-  to { transform: translateX(calc(-100% - var(--gap, 1rem))); }
+  to { transform: translateX(-100%); }
 }
+/* Chat button pulse: a disc behind the button grows and fades (transform + opacity only,
+   so it never repaints the page — animating box-shadow did, every frame, on every page). */
 @keyframes pulse-ring {
   0% {
-    box-shadow: 0 0 0 0 rgb(156 0 21 / 0.5);
+    transform: scale(1);
+    opacity: 1;
   }
-  70% {
-    box-shadow: 0 0 0 16px rgb(156 0 21 / 0);
-  }
+  70%,
   100% {
-    box-shadow: 0 0 0 0 rgb(156 0 21 / 0);
+    transform: scale(1.53);
+    opacity: 0;
   }
 }
 
@@ -531,8 +569,22 @@
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
-.anim-pulse {
+.anim-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: rgb(156 0 21 / 0.5);
+  pointer-events: none;
   animation: pulse-ring 2.6s ease-out 2s infinite;
+}
+
+/* Below-the-fold home sections: the browser skips their layout/paint (and their animations)
+   until they come near the screen. Big win on phones for load time and scrolling. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
 }
 
 .marquee {
@@ -912,6 +964,19 @@
 @keyframes blur-in {
   from { opacity: 0; filter: blur(10px); transform: translateY(0.25em); }
   to { opacity: 1; filter: blur(0); transform: none; }
+}
+/* phones and tablets: same word-by-word rise, without the blur filter (expensive to paint there) */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(0.25em); }
+  to { opacity: 1; transform: none; }
+}
+@media (max-width: 1023px) {
+  .has-js .blur-text:not(.is-in) .blur-word {
+    filter: none;
+  }
+  .has-js .blur-text.is-in .blur-word {
+    animation-name: rise-in;
+  }
 }
 
 /* Scroll progress bar at the bottom edge of the sticky header */

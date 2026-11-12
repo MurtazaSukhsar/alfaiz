@@ -30,12 +30,15 @@ export type ProductRow = {
   updated_at: string;
 };
 export type ProductLite = Pick<ProductRow, 'handle' | 'name' | 'brand' | 'brand_handle' | 'collections' | 'images' | 'published' | 'available' | 'featured' | 'featured_rank' | 'industries' | 'updated_at'>;
+export type PostLite = { slug: string; title: string; excerpt: string; cover: string; tags: string[]; published: boolean; published_at: string; updated_at: string };
+export type PostRow = PostLite & { html: string; author: string };
 export type CollectionRow = { handle: string; title: string; kind: 'brand' | 'category'; image: string | null; html: string; sort: number; published: boolean; updated_at: string };
 
 type State = {
   ready: boolean;
   products: ProductLite[];
   collections: CollectionRow[];
+  posts: PostLite[];
   content: Partial<Record<ContentKey, unknown>>;
   contentUpdated: Partial<Record<ContentKey, string>>;
   /** private admin settings (deploy hook, last publish time) */
@@ -44,7 +47,7 @@ type State = {
 };
 export type AdminSettings = { vercel_deploy_hook?: string; last_publish?: string };
 
-let state: State = { ready: false, products: [], collections: [], content: {}, contentUpdated: {}, admin: {}, error: '' };
+let state: State = { ready: false, products: [], collections: [], posts: [], content: {}, contentUpdated: {}, admin: {}, error: '' };
 const subs = new Set<() => void>();
 const set = (patch: Partial<State>) => {
   state = { ...state, ...patch };
@@ -122,7 +125,7 @@ export async function loadCollections(full = false) {
 }
 /** Throw away the browser copy and download everything again. */
 export async function reloadEverything() {
-  await Promise.all([loadProducts(true), loadCollections(true), loadContent(), loadAdmin()]);
+  await Promise.all([loadProducts(true), loadCollections(true), loadContent(), loadAdmin(), loadPosts()]);
 }
 export async function loadContent() {
   const rows = await db<{ key: ContentKey; value: unknown; updated_at: string }[]>('site_content?select=key,value,updated_at');
@@ -130,6 +133,15 @@ export async function loadContent() {
     content: Object.fromEntries(rows.map((r) => [r.key, r.value])),
     contentUpdated: Object.fromEntries(rows.map((r) => [r.key, r.updated_at])),
   });
+}
+export async function loadPosts() {
+  const posts = await dbAll<PostLite>('posts?select=slug,title,excerpt,cover,tags,published,published_at,updated_at&order=published_at.desc');
+  set({ posts });
+}
+export function patchPost(p: PostLite | null, removedSlug?: string) {
+  let posts = state.posts.filter((x) => x.slug !== (removedSlug ?? p?.slug));
+  if (p) posts = [...posts, p].sort((a, b) => b.published_at.localeCompare(a.published_at));
+  set({ posts });
 }
 export async function loadAdmin() {
   const rows = await db<{ key: string; value: string }[]>('admin_settings?select=key,value');
@@ -141,7 +153,7 @@ export async function saveAdmin(key: keyof AdminSettings, value: string) {
 }
 export async function loadAll() {
   try {
-    await Promise.all([loadProducts(), loadCollections(), loadContent(), loadAdmin()]);
+    await Promise.all([loadProducts(), loadCollections(), loadContent(), loadAdmin(), loadPosts()]);
     set({ ready: true, error: '' });
   } catch (e) {
     set({ error: (e as Error).message });

@@ -179,3 +179,29 @@ create policy "admins delete images" on storage.objects for delete to authentica
   using (bucket_id = 'product-images' and (select public.is_admin()));
 
 insert into public.admins (email) values ('alfaizinfo@gmail.com') on conflict do nothing;
+
+-- ---------------------------------------------------------------------------------------------
+-- Blog (/blog/) — added Nov 2026. Written in the admin panel → Blog.
+create table if not exists public.posts (
+  slug         text primary key,
+  title        text not null,
+  excerpt      text not null default '',
+  cover        text not null default '',
+  html         text not null default '',
+  author       text not null default 'Al Faiz team',
+  tags         text[] not null default '{}',
+  published    boolean not null default false,
+  published_at timestamptz not null default now(),
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+alter table public.posts enable row level security;
+drop trigger if exists posts_touch on public.posts;
+create trigger posts_touch before update on public.posts
+  for each row execute function public.touch_updated_at();
+create index if not exists posts_published_idx on public.posts (published, published_at desc);
+drop policy if exists "read published posts" on public.posts;
+create policy "read published posts" on public.posts for select to anon, authenticated using (published);
+drop policy if exists "admins manage posts" on public.posts;
+create policy "admins manage posts" on public.posts for all to authenticated
+  using ((select public.is_admin())) with check ((select public.is_admin()));

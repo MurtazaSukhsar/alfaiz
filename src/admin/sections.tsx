@@ -29,32 +29,47 @@ export const sections: SectionDef[] = [
   {
     key: 'hero',
     title: 'Hero',
-    desc: 'The first thing visitors see: headline, short text and the product tiles on the right.',
+    desc: 'The full-width slides at the top of the home page — one per category. Each has a background photo that shows the products, the headline and a “Get a quote” button.',
     where: '/#hero-title',
     fields: [
-      { type: 'text', name: 'badge', label: 'Small label above the headline', help: 'Leave empty to hide it.' },
-      { type: 'text', name: 'title1', label: 'Headline — first line', half: true },
-      { type: 'text', name: 'title2', label: 'Headline — second line (red)', half: true },
-      { type: 'textarea', name: 'text', label: 'Text under the headline' },
       {
         type: 'list',
-        name: 'tiles',
-        label: 'Product tiles',
-        help: 'Six tiles fill the grid (3 × 2). The small label is shown under each photo.',
-        max: 6,
-        addLabel: 'Add product tile',
-        newItem: () => ({ handle: '', label: '' }),
-        itemLabel: (v) => v.label || productName(v.handle),
-        itemImage: (v) => productImg(v.handle),
+        name: 'slides',
+        label: 'Slides',
+        help: 'Shown in this order; they change every 6.5 seconds. 4–6 slides work well.',
+        max: 10,
+        addLabel: 'Add slide',
+        newItem: () => ({ label: '', title1: '', title2: '', text: '', image: '', focus: 'right', collection: '' }),
+        itemLabel: (v) => [v.title1, v.title2].filter(Boolean).join(' '),
+        itemImage: (v) => v.image,
         item: [
-          { type: 'product', name: 'handle', label: 'Product' },
-          { type: 'text', name: 'label', label: 'Short label', help: 'e.g. “Table saw”. Keep it to 1–3 words.' },
+          { type: 'image', name: 'image', label: 'Background photo', folder: 'hero', cover: true, help: 'Wide photo (at least 1600 × 800) with the products in the right half — the text sits on the left.' },
+          {
+            type: 'select',
+            name: 'focus',
+            label: 'On phones, keep this part of the photo',
+            half: true,
+            options: [
+              { value: 'right', label: 'Right' },
+              { value: 'center', label: 'Middle' },
+              { value: 'left', label: 'Left' },
+            ],
+          },
+          { type: 'collection', name: 'collection', label: '“Explore” button opens', kind: 'category', half: true },
+          { type: 'text', name: 'label', label: 'Small line above the headline', placeholder: 'Power Tools · DeWALT, Makita, Bosch' },
+          { type: 'text', name: 'title1', label: 'Headline — first line', half: true },
+          { type: 'text', name: 'title2', label: 'Headline — second line (red)', half: true },
+          { type: 'textarea', name: 'text', label: 'Text under the headline' },
         ],
       },
     ],
     clean: (v) => {
-      const tiles = dropEmpty(v.tiles, (t: any) => !!t.handle);
-      return { value: { ...v, tiles }, error: tiles.length ? undefined : 'Add at least one product tile.' };
+      const slides = dropEmpty(v.slides, (x: any) => !!x.title1?.trim() || !!x.image);
+      for (const [i, x] of slides.entries()) {
+        if (!x.image) return { value: v, error: `Slide ${i + 1} needs a background photo.` };
+        if (!x.title1?.trim()) return { value: v, error: `Slide ${i + 1} needs a headline.` };
+      }
+      return { value: { slides: slides.map((x: any) => ({ ...x, focus: x.focus || 'center' })) }, error: slides.length ? undefined : 'Add at least one slide.' };
     },
   },
   {

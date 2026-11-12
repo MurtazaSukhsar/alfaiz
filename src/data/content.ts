@@ -27,14 +27,22 @@ export type Settings = {
   popularSearches: string[];
 };
 
-export type HeroContent = {
-  badge: string;
+/** One full-width slide of the home hero: a background photo that shows the products + the quote text. */
+export type HeroSlide = {
+  /** small line above the headline, e.g. "Power Tools · DeWALT, Makita, Bosch" */
+  label: string;
   title1: string;
+  /** second headline line, shown in red */
   title2: string;
   text: string;
-  /** product tiles on the right (6 look best) */
-  tiles: { handle: string; label: string }[];
+  /** background photo (wide; the products should be in the right half) */
+  image: string;
+  /** which part of the photo stays visible on narrow screens */
+  focus: 'left' | 'center' | 'right';
+  /** category the “Explore” button opens */
+  collection: string;
 };
+export type HeroContent = { slides: HeroSlide[] };
 
 export type TrustItem = { icon: string; title: string; short: string; text: string };
 export type BrandItem = { handle: string; name: string; logo?: string };
@@ -110,17 +118,61 @@ export function makeDefaults(s: Settings, brandNames?: string[]): Omit<SiteConte
 
   return {
     hero: {
-      badge: 'Genuine brands · Quotes in minutes',
-      title1: 'Genuine tools,',
-      title2: 'quoted fast.',
-      text: 'DeWALT, Makita, Bosch, Milwaukee and more. Browse the range, or send us your list — we reply with price, stock and delivery.',
-      tiles: [
-        { handle: 'dewalt-dwe7492-qs-250mm-table-saw-2000w-professional-portable-table-saw-825mm-rip-capacity-77mm-depth-of-cut-30mm-bore-genuine-dewalt-uae-al-faiz-hardware', label: 'Table saw' },
-        { handle: 'makita-slide-compound-miter-saw-ls1019l-1-510-w-260-mm-blade-al-faiz-electric-and-hardware', label: 'Mitre saw' },
-        { handle: 'bosch-gst-650-professional-jigsaw-450w-variable-speed-compact-design', label: 'Jigsaw' },
-        { handle: 'milwaukee-m18bos125-0-m18-18v-125mm-cordless-random-orbital-sander-12-000-opm-2-4mm-orbit-variable-speed-bare-tool', label: 'Orbital sander' },
-        { handle: 'clarke-electric-cement-mixer-180l-clecm180-heavy-duty-concrete-mixing-machine-portable-construction-cement-mixer-uae-al-faiz-hardware-sharjah', label: 'Cement mixer' },
-        { handle: 'dewalt-dwe5615-gb-190mm-circular-saw-1500w-68mm-professional-wood-cutting-circular-saw-5500-rpm-30mm-bore-airlock-compatible-genuine-dewalt-uae-al-faiz-hardware-2-h1-tag', label: 'Circular saw' },
+      slides: [
+        {
+          label: 'Power Tools · DeWALT, Makita, Bosch, Milwaukee',
+          title1: 'Genuine tools,',
+          title2: 'quoted fast.',
+          text: 'Drills, grinders, saws and breakers for site and workshop. Send us your list — we reply with price, stock and delivery.',
+          image: '/images/hero/power-tools.webp',
+          focus: 'right',
+          collection: 'power-tools',
+        },
+        {
+          label: 'Air Compressors · Shamal, FIAC, ABAC',
+          title1: 'Air compressors,',
+          title2: 'ready for work.',
+          text: 'Belt-drive and direct-drive compressors for workshops, garages and sites. Tell us the air you need and we’ll match the model.',
+          image: '/images/hero/air-compressors.webp',
+          focus: 'right',
+          collection: 'air-compressors',
+        },
+        {
+          label: 'Adhesives & Sealants · Bison, Araldite, Fevicol',
+          title1: 'Adhesives & sealants,',
+          title2: 'by the tube or drum.',
+          text: 'Contact adhesives, epoxy, wood glue, silicone and PU foam — single packs or bulk for contractors.',
+          image: '/images/hero/adhesives-sealants.webp',
+          focus: 'right',
+          collection: 'adhesives-sealants',
+        },
+        {
+          label: 'Non-Sparking Tools · Oil & gas, marine, petrochemical',
+          title1: 'Non-sparking tools,',
+          title2: 'for hazardous areas.',
+          text: 'Spanners, hammers, sockets and pliers in aluminium bronze and beryllium copper — single tools or full kits.',
+          image: '/images/hero/non-sparking-tools.webp',
+          focus: 'right',
+          collection: 'non-sparking-tools',
+        },
+        {
+          label: 'Site Equipment · Clarke, Eagle, Rubi',
+          title1: 'Site equipment,',
+          title2: 'from one supplier.',
+          text: 'Cement mixers, generators, tile cutters, breakers and scaffolding for construction sites across the UAE.',
+          image: '/images/hero/site-equipment.webp',
+          focus: 'right',
+          collection: 'construction-tools',
+        },
+        {
+          label: 'Welding · Edon, Kiswel',
+          title1: 'Welding & cutting,',
+          title2: 'supplied in bulk.',
+          text: 'Welding machines, electrodes and cutting discs for fabrication shops, workshops and shipyards.',
+          image: '/images/hero/welding-machines.webp',
+          focus: 'right',
+          collection: 'welding',
+        },
       ],
     },
 

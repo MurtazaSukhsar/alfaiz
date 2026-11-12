@@ -3,8 +3,8 @@
 // Runs automatically before `npm run dev` and `npm run build`, so edits made in the admin show up on the site.
 //
 // Keeps Supabase egress (download traffic) low:
-//   1. It first asks Supabase for a tiny fingerprint (row count + last edit time of products, collections and
-//      site sections — a few hundred bytes). If nothing changed since the last download, nothing is downloaded.
+//   1. It first asks Supabase for a tiny fingerprint (row count + last edit time of products, collections,
+//      site sections and blog posts — a few hundred bytes). If nothing changed since the last download, nothing is downloaded.
 //   2. Photos uploaded in the admin (Supabase Storage) are downloaded ONCE into public/media/ (and kept in
 //      .next/cache/af-media, which Vercel keeps between builds). The website links to those copies, so
 //      visitors never load images from Supabase.
@@ -19,16 +19,16 @@ import { existsSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { hasSupabase, rest, supabase } from './lib-env.mjs';
 import { writeCatalog } from './lib-catalog.mjs';
-import { cleanHtml, plainText } from './lib-html.mjs';
+import { cleanHtml, cleanPostHtml, plainText } from './lib-html.mjs';
 
 const args = process.argv.slice(2);
 const FORCE = args.includes('--force');
 const OFFLINE = process.env.SUPABASE_OFFLINE === '1' || args.includes('--offline');
-const FILES = { catalog: 'data/catalog.json', content: 'data/content.json', stamp: 'data/.supabase-stamp.json', media: 'data/media.json' };
+const FILES = { catalog: 'data/catalog.json', content: 'data/content.json', posts: 'data/posts.json', stamp: 'data/.supabase-stamp.json', media: 'data/media.json' };
 const MEDIA_DIR = 'public/media';
 const MEDIA_CACHE = '.next/cache/af-media';
 const STORAGE = `${supabase.url}/storage/v1/object/public/`;
-const FORMAT = 2; // bump when the way data is processed below changes, to force one fresh download
+const FORMAT = 3; // bump when the way data is processed below changes, to force one fresh download
 
 const readJson = async (f, d) => {
   try {
@@ -51,16 +51,17 @@ async function fingerprintOf(table) {
   return `${(res.headers.get('content-range') || '').split('/')[1] || '?'}@${rows[0]?.updated_at || ''}`;
 }
 const fingerprint = async () => {
-  const [p, c, s] = await Promise.all(['products', 'collections', 'site_content'].map(fingerprintOf));
-  return { format: FORMAT, products: p, collections: c, content: s };
+  const [p, c, s, b] = await Promise.all(['products', 'collections', 'site_content', 'posts'].map(fingerprintOf));
+  return { format: FORMAT, products: p, collections: c, content: s, posts: b };
 };
 
 /* ----------------------------------------------------------------- 2. media copies */
 
-/** Every Supabase Storage URL inside a value (deep). */
+/** Every Supabase Storage URL inside a value (deep, also inside HTML). */
+const STORAGE_RE = new RegExp(`${STORAGE.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}[^"'\\s<>)]+`, 'g');
 function findMedia(v, out = new Set()) {
   if (typeof v === 'string') {
-    if (v.startsWith(STORAGE)) out.add(v);
+    for (const m of v.match(STORAGE_RE) || []) out.add(m);
   } else if (Array.isArray(v)) v.forEach((x) => findMedia(x, out));
   else if (v && typeof v === 'object') Object.values(v).forEach((x) => findMedia(x, out));
   return out;
@@ -103,7 +104,7 @@ async function ensureMedia(manifest, allowDownload) {
 
 /** Swap Supabase Storage URLs for the local /media/ copies (deep). */
 function useLocal(v, map) {
-  if (typeof v === 'string') return map[v] ?? v;
+  if (typeof v === 'string') return v.includes(STORAGE) ? v.replace(STORAGE_RE, (m) => map[m] ?? m) : v;
   if (Array.isArray(v)) return v.map((x) => useLocal(x, map));
   if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, useLocal(x, map)]));
   return v;
@@ -114,6 +115,7 @@ function useLocal(v, map) {
 const stamp = await readJson(FILES.stamp, null);
 const haveFiles = existsSync(FILES.catalog) && existsSync(FILES.content);
 if (!existsSync(FILES.content)) await writeFile(FILES.content, '{}');
+if (!existsSync(FILES.posts)) await writeFile(FILES.posts, '[]');
 
 let remote = null;
 if (OFFLINE) console.log('• Supabase: offline mode — using the last downloaded data.');
@@ -152,11 +154,13 @@ async function all(table, select, order) {
 let rawCols;
 let rawProducts;
 let rawContent;
+let rawPosts;
 try {
-  [rawCols, rawProducts, rawContent] = await Promise.all([
+  [rawCols, rawProducts, rawContent, rawPosts] = await Promise.all([
     all('collections', 'handle,title,kind,image,html,sort', 'sort.asc,title.asc'),
     all('products', 'handle,title,name,subtitle,brand,brand_handle,type,tags,collections,images,price,available,options,variants,html,summary,updated_at,featured,featured_rank,industries', 'sort.asc,created_at.asc'),
     rest('site_content?select=key,value'),
+    all('posts', 'slug,title,excerpt,cover,html,author,tags,published_at,updated_at', 'published_at.desc'),
   ]);
 } catch (e) {
   console.warn(`⚠ Supabase: download failed (${e.message.slice(0, 160)}) — using the last downloaded data.`);
@@ -208,21 +212,35 @@ let collections = rawCols
 
 let content = Object.fromEntries((rawContent || []).map((r) => [r.key, r.value]));
 
+let posts = (rawPosts || []).map((b) => ({
+  slug: b.slug,
+  title: b.title,
+  excerpt: b.excerpt || plainText(b.html).slice(0, 200),
+  cover: b.cover || '',
+  html: cleanPostHtml(b.html),
+  author: b.author || 'Al Faiz team',
+  tags: b.tags || [],
+  date: b.published_at,
+  updatedAt: b.updated_at,
+}));
+
 // photos uploaded in the admin → local copies
-const remoteMedia = findMedia([products.map((p) => p.images), collections.map((c) => c.image), content]);
+const remoteMedia = findMedia([products.map((p) => p.images), collections.map((c) => c.image), content, posts]);
 const wanted = Object.fromEntries([...remoteMedia].map((r) => [localUrl(r), r]));
 const { bytes, failed } = await ensureMedia(wanted, true);
 const map = Object.fromEntries(Object.entries(wanted).filter(([l]) => !failed.includes(l)).map(([l, r]) => [r, l]));
 products = useLocal(products, map);
 collections = useLocal(collections, map);
 content = useLocal(content, map);
+posts = useLocal(posts, map);
 await writeFile(FILES.media, JSON.stringify(Object.fromEntries(Object.entries(wanted).filter(([l]) => !failed.includes(l))), null, 1));
 
 await writeFile(FILES.content, JSON.stringify(content, null, 1));
+await writeFile(FILES.posts, JSON.stringify(posts, null, 1));
 await writeCatalog({ store: supabase.url, products, collections });
 await writeFile(FILES.stamp, JSON.stringify({ at: new Date().toISOString(), fingerprint: remote }, null, 1));
 
 console.log(
-  `✓ Supabase: ${products.length} products, ${collections.length} brands & categories, ${Object.keys(content).length} edited sections` +
+  `✓ Supabase: ${products.length} products, ${collections.length} brands & categories, ${Object.keys(content).length} edited sections, ${posts.length} blog posts` +
     (remoteMedia.size ? ` · ${remoteMedia.size} uploaded photos kept in public/media${bytes ? ` (${kb(bytes)} new)` : ''}` : ''),
 );

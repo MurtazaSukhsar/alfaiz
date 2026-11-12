@@ -92,7 +92,7 @@ export function SearchBox({
           e.preventDefault();
           submit();
         }}
-        className="beam flex h-11 items-center gap-2 rounded-full border border-transparent bg-chip pl-4 pr-1.5 transition hover:bg-[#ebece8] focus-within:border-line focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(21,23,26,.06)] lg:h-10"
+        className="beam flex h-11 items-center gap-2 rounded-lg border border-transparent bg-chip pl-4 pr-1.5 transition hover:bg-[#ebece8] focus-within:border-line focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(21,23,26,.06)] lg:h-10"
       >
         <Icon name="search" size={17} strokeWidth={2} className="shrink-0 text-muted" />
         <label htmlFor="site-search" className="sr-only">
@@ -128,11 +128,11 @@ export function SearchBox({
                 setQuery('');
                 inputRef.current?.focus();
               }}
-              className="grid size-8 shrink-0 place-items-center rounded-full text-muted hover:text-ink"
+              className="grid size-8 shrink-0 place-items-center rounded-md text-muted hover:text-ink"
             >
               <Icon name="x" size={15} strokeWidth={2} />
             </button>
-            <button type="submit" aria-label="Search" className="grid size-8 shrink-0 place-items-center rounded-full bg-accent text-white transition hover:brightness-115">
+            <button type="submit" aria-label="Search" className="grid size-8 shrink-0 place-items-center rounded-md bg-accent text-white transition hover:brightness-115">
               <Icon name="arrow" size={14} strokeWidth={2.2} />
             </button>
           </>
@@ -167,7 +167,7 @@ export function SearchBox({
                   className="group flex min-h-11 items-center"
                 >
                   <span
-                    className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold transition ${
+                    className={`inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-[13px] font-semibold transition ${
                       active === i ? 'border-ink text-ink' : 'border-line text-ink-2 group-hover:border-ink group-hover:text-ink'
                     }`}
                   >
@@ -229,7 +229,7 @@ export function SearchBox({
                 rel="noopener"
                 className="mt-1 inline-flex h-11 items-center rounded-[10px] bg-accent px-4 text-sm font-bold text-white transition hover:brightness-115"
               >
-                Ask on WhatsApp
+                Enquire on WhatsApp
               </a>
             </div>
           )}

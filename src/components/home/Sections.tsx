@@ -6,18 +6,18 @@ import { imgUrl } from '@/lib/format';
 import { Icon, type IconName } from '../Icons';
 import { BlurText } from '../fx/BlurText';
 import { BrandEdit, type EditIssue, type EditItem } from '../BrandEdit';
-import { BrandHero, type HeroTile } from '../BrandHero';
+import { BrandHero, type HeroSlideView } from '../BrandHero';
 import { ProductCard } from '../ProductCard';
 import { TestimonialsSection } from '../ui/testimonials-with-marquee';
 
 /* ---------------------------------------------------------------- Hero (product grid) */
 
 export function Hero() {
-  const tiles: HeroTile[] = hero.tiles.flatMap(({ handle, label }) => {
-    const p = getProduct(handle);
-    return p?.images.length ? [{ href: `/products/${p.handle}/`, brand: p.brand, label: label || p.name, name: p.name, image: imgUrl(p.images[0].src, 600) }] : [];
+  const slides: HeroSlideView[] = hero.slides.flatMap((x) => {
+    const c = getCollection(x.collection);
+    return [{ ...x, focus: x.focus || 'center', href: c ? `/collections/${c.handle}/` : '/collections/all/', name: c?.title ?? 'all products' }];
   });
-  return <BrandHero tiles={tiles} badge={hero.badge} title1={hero.title1} title2={hero.title2} text={hero.text} />;
+  return <BrandHero slides={slides} />;
 }
 
 /* ---------------------------------------------------------------- Featured products */
@@ -100,7 +100,7 @@ export function Categories() {
             <li key={t.handle} className="reveal">
               <Link
                 href={`/collections/${t.handle}/`}
-                className="spot group flex h-full flex-col items-center gap-2 rounded-[12px] bg-white p-2 pb-3 text-center ring-1 ring-line-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_32px_-20px_rgba(21,23,26,.45)] hover:ring-accent/40 sm:p-3 sm:pb-4"
+                className="spot group flex h-full flex-col items-center gap-2 rounded-[10px] bg-white p-2 pb-3 text-center ring-1 ring-line-soft transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_32px_-20px_rgba(21,23,26,.45)] hover:ring-accent/40 sm:p-3 sm:pb-4"
               >
                 <span className="grid aspect-square w-full place-items-center overflow-hidden rounded-2xl bg-[#F4F4F1] p-1 transition duration-300 group-hover:bg-accent-soft sm:p-1.5">
                   <img
@@ -192,7 +192,7 @@ function AllProductsTile() {
   return (
     <Link
       href="/collections/all/"
-      className="group relative isolate flex h-full items-center justify-between gap-4 overflow-hidden rounded-[12px] bg-ink p-5 text-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_40px_-20px_rgba(21,23,26,.6)] sm:p-6"
+      className="group relative isolate flex h-full items-center justify-between gap-4 overflow-hidden rounded-[10px] bg-ink p-5 text-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_40px_-20px_rgba(21,23,26,.6)] sm:p-6"
     >
       <span aria-hidden="true" className="absolute -bottom-24 -left-16 -z-10 size-64 rounded-full bg-accent/20 blur-3xl transition duration-500 group-hover:bg-accent/30" />
 
@@ -263,7 +263,7 @@ export function BrandMarquee() {
           </div>
           <p className="max-w-[340px] text-[15px] leading-relaxed text-muted">Tap a brand to see everything we stock from them.</p>
         </div>
-        <div className="group flex overflow-hidden py-2 [--duration:55s] [--gap:16px] [gap:var(--gap)] [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]">
+        <div className="group flex overflow-hidden py-2 [--duration:55s] [--gap:16px] [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]">
           <Track />
           <Track hidden />
         </div>

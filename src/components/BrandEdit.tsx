@@ -167,7 +167,7 @@ function Spread({ issue, i, n, active }: { issue: EditIssue; i: number; n: numbe
     <article
       aria-roledescription="slide"
       aria-label={`${i + 1} of ${n}: ${issue.name}`}
-      className={`be-slide relative grid shrink-0 snap-center overflow-hidden rounded-[14px] bg-white shadow-[0_1px_2px_rgba(21,23,26,.05),0_24px_48px_-32px_rgba(21,23,26,.35)] ring-1 ring-line-soft transition duration-500 lg:grid-cols-[0.82fr_1fr] ${
+      className={`be-slide relative grid shrink-0 snap-center overflow-hidden rounded-[10px] bg-white shadow-[0_1px_2px_rgba(21,23,26,.05),0_24px_48px_-32px_rgba(21,23,26,.35)] ring-1 ring-line-soft transition duration-500 lg:grid-cols-[0.82fr_1fr] ${
         active ? 'opacity-100' : 'opacity-50 lg:scale-[0.97]'
       }`}
     >

@@ -37,7 +37,7 @@ export function BulkRequestForm() {
         setTouched(true);
         if (ok) window.open(waLink(message), '_blank', 'noopener');
       }}
-      className="flex flex-col gap-5 rounded-[28px] bg-white p-6 ring-1 ring-line-soft sm:p-8"
+      className="flex flex-col gap-5 rounded-[10px] bg-white p-6 ring-1 ring-line-soft sm:p-8"
       noValidate
     >
       <div className="grid gap-5 sm:grid-cols-2">

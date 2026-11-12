@@ -13,7 +13,7 @@ export function Dashboard() {
   const { products, collections, contentUpdated } = useStore();
   const { admin, busy, publish } = usePublish();
   const pending = usePending(admin.last_publish);
-  const total = pending.products + pending.collections + pending.sections;
+  const total = pending.products + pending.collections + pending.sections + pending.posts;
   const recent = [...products].sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || '')).slice(0, 6);
   const stats: { label: string; value: number; href: string; icon: IconName }[] = [
     { label: 'Products on website', value: products.filter((p) => p.published).length, href: '#/products?s=visible', icon: 'box' },
